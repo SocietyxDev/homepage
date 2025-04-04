@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNTAX | Login</title>
+    <title>IMMORTAL | Login</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
@@ -152,9 +152,59 @@
             font-size: 1.3rem;
         }
 
-        /* Dashboard Styles (hidden by default) */
+        /* Dashboard Styles */
         .dashboard {
             display: none;
+        }
+
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .profile-menu.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .profile-menu a {
+            color: var(--text-dark);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .profile-menu a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .profile-menu a.logout {
+            color: #e74c3c;
+        }
+
+        .profile-menu a.logout:hover {
+            background-color: #fdecea;
         }
 
         /* Sidebar Styles */
@@ -264,6 +314,12 @@
             object-fit: cover;
             cursor: pointer;
             border: 2px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(88, 101, 242, 0.5);
         }
 
         /* Responsive Styles */
@@ -318,7 +374,7 @@
     <!-- Login Page (shown by default) -->
     <div class="login-container" id="loginPage">
         <div class="login-content">
-            <h1 class="game-title">SYNTAX</h1>
+            <h1 class="game-title">IMMORTAL</h1>
             <button class="discord-login-btn" id="discordLogin">
                 <i class="fab fa-discord"></i>
                 LOGIN WITH DISCORD
@@ -333,7 +389,7 @@
             <div class="sidebar-header">
                 <div class="sidebar-title">
                     <i class="fas fa-gamepad"></i>
-                    <span>SYNTAX</span>
+                    <span>IMMORTAL</span>
                 </div>
             </div>
 
@@ -375,7 +431,13 @@
                 </button>
                 <h1 class="page-title">Dashboard</h1>
                 <div class="user-menu">
-                    <img src="" alt="User Avatar" class="user-avatar" id="userAvatar">
+                    <div class="profile-dropdown">
+                        <img src="" alt="User Avatar" class="user-avatar" id="userAvatar">
+                        <div class="profile-menu" id="profileMenu">
+                            <a href="#"><i class="fas fa-user"></i> Profile</a>
+                            <a href="#" class="logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -398,6 +460,32 @@
         const discordLoginBtn = document.getElementById('discordLogin');
         const userAvatar = document.getElementById('userAvatar');
         const usernameSpan = document.getElementById('username');
+        const profileMenu = document.getElementById('profileMenu');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Toggle profile menu
+        userAvatar.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profileMenu.classList.toggle('show');
+        });
+
+        // Close profile menu when clicking elsewhere
+        document.addEventListener('click', function() {
+            profileMenu.classList.remove('show');
+        });
+
+        // Logout functionality
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Clear any stored user data
+            localStorage.removeItem('discordUser');
+            // Return to login page
+            dashboard.style.display = 'none';
+            loginPage.style.display = 'flex';
+            // Reset avatar and username
+            userAvatar.src = '';
+            usernameSpan.textContent = 'User';
+        });
 
         // Check for Discord auth response in URL
         function checkAuthResponse() {
@@ -427,6 +515,9 @@
                 
                 const userData = await response.json();
                 
+                // Store user data
+                localStorage.setItem('discordUser', JSON.stringify(userData));
+                
                 // Show dashboard with user data
                 showDashboard(userData);
             } catch (error) {
@@ -452,6 +543,14 @@
             
             // Set username
             usernameSpan.textContent = userData.username || 'User';
+        }
+
+        // Check for existing session on page load
+        function checkExistingSession() {
+            const storedUser = localStorage.getItem('discordUser');
+            if (storedUser) {
+                showDashboard(JSON.parse(storedUser));
+            }
         }
 
         // Initialize Discord login
@@ -500,6 +599,7 @@
 
         // Initialize the app
         function init() {
+            checkExistingSession();
             checkAuthResponse();
             initDiscordLogin();
             initMobileMenu();
