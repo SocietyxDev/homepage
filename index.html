@@ -157,6 +157,161 @@
             display: none;
         }
 
+        /* Notification System */
+        .notification-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .notification-btn {
+            background-color: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: none;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .notification-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-3px);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--neon-red);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .notification-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            width: 350px;
+            max-width: 90%;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+
+        .notification-popup.show {
+            display: block;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .notification-header {
+            padding: 15px 20px;
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .notification-content {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .notification-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .notification-nav-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-nav-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .notification-nav-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
         /* Profile Dropdown Styles */
         .profile-dropdown {
             position: relative;
@@ -384,6 +539,49 @@
 
     <!-- Dashboard (hidden until login) -->
     <div class="dashboard" id="dashboard">
+        <!-- Notification System -->
+        <div class="notification-container">
+            <button class="notification-btn" id="notificationBtn">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge">3</span>
+            </button>
+        </div>
+
+        <!-- Notification Popup -->
+        <div class="notification-popup" id="notificationPopup">
+            <div class="notification-header">
+                <span>Notifications</span>
+                <button class="notification-close" id="notificationClose">&times;</button>
+            </div>
+            <div class="notification-content" id="notificationContent">
+                <div class="notification-item">
+                    <div class="notification-title">New Update Available</div>
+                    <div class="notification-time">2 hours ago</div>
+                    <div class="notification-message">Version 2.5.0 is now available with new features.</div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-title">Maintenance Scheduled</div>
+                    <div class="notification-time">1 day ago</div>
+                    <div class="notification-message">Server maintenance planned for tomorrow at 3 AM UTC.</div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-title">Welcome to IMMORTAL</div>
+                    <div class="notification-time">3 days ago</div>
+                    <div class="notification-message">Thank you for joining our community!</div>
+                </div>
+            </div>
+            <div class="notification-footer">
+                <button class="notification-nav-btn" id="prevNotification" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <button class="notification-nav-btn" id="nextNotification">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="overlay" id="overlay"></div>
+
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -462,16 +660,95 @@
         const usernameSpan = document.getElementById('username');
         const profileMenu = document.getElementById('profileMenu');
         const logoutBtn = document.getElementById('logoutBtn');
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationPopup = document.getElementById('notificationPopup');
+        const notificationClose = document.getElementById('notificationClose');
+        const overlay = document.getElementById('overlay');
+        const prevNotification = document.getElementById('prevNotification');
+        const nextNotification = document.getElementById('nextNotification');
+        const notificationBadge = document.getElementById('notificationBadge');
+        const notificationContent = document.getElementById('notificationContent');
 
-        // Toggle profile menu
+        // Notification System
+        let currentNotificationIndex = 0;
+        const notifications = [
+            {
+                title: "New Update Available",
+                time: "2 hours ago",
+                message: "Version 2.5.0 is now available with new features."
+            },
+            {
+                title: "Maintenance Scheduled",
+                time: "1 day ago",
+                message: "Server maintenance planned for tomorrow at 3 AM UTC."
+            },
+            {
+                title: "Welcome to IMMORTAL",
+                time: "3 days ago",
+                message: "Thank you for joining our community!"
+            }
+        ];
+
+        // Toggle notification popup
+        notificationBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notificationPopup.classList.add('show');
+            overlay.classList.add('show');
+            updateNotificationDisplay();
+        });
+
+        // Close notification popup
+        notificationClose.addEventListener('click', function() {
+            notificationPopup.classList.remove('show');
+            overlay.classList.remove('show');
+        });
+
+        overlay.addEventListener('click', function() {
+            notificationPopup.classList.remove('show');
+            overlay.classList.remove('show');
+            profileMenu.classList.remove('show');
+        });
+
+        // Navigation buttons
+        prevNotification.addEventListener('click', function() {
+            if (currentNotificationIndex > 0) {
+                currentNotificationIndex--;
+                updateNotificationDisplay();
+            }
+        });
+
+        nextNotification.addEventListener('click', function() {
+            if (currentNotificationIndex < notifications.length - 1) {
+                currentNotificationIndex++;
+                updateNotificationDisplay();
+            }
+        });
+
+        function updateNotificationDisplay() {
+            const notification = notifications[currentNotificationIndex];
+            notificationContent.innerHTML = `
+                <div class="notification-item">
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-time">${notification.time}</div>
+                    <div class="notification-message">${notification.message}</div>
+                </div>
+            `;
+            
+            // Update button states
+            prevNotification.disabled = currentNotificationIndex === 0;
+            nextNotification.disabled = currentNotificationIndex === notifications.length - 1;
+            
+            // Update badge if viewing the last notification
+            if (currentNotificationIndex === notifications.length - 1) {
+                notificationBadge.textContent = '0';
+                notificationBadge.style.display = 'none';
+            }
+        }
+
+        // Profile Dropdown
         userAvatar.addEventListener('click', function(e) {
             e.stopPropagation();
             profileMenu.classList.toggle('show');
-        });
-
-        // Close profile menu when clicking elsewhere
-        document.addEventListener('click', function() {
-            profileMenu.classList.remove('show');
         });
 
         // Logout functionality
@@ -485,6 +762,9 @@
             // Reset avatar and username
             userAvatar.src = '';
             usernameSpan.textContent = 'User';
+            // Close any open popups
+            notificationPopup.classList.remove('show');
+            overlay.classList.remove('show');
         });
 
         // Check for Discord auth response in URL
