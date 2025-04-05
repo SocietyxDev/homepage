@@ -10,6 +10,7 @@
         
         :root {
             --sidebar-width: 240px;
+            --sidebar-collapsed-width: 70px;
             --sidebar-bg: rgba(20, 20, 30, 0.95);
             --sidebar-active: rgba(255, 51, 102, 0.3);
             --sidebar-text: #e2e8f0;
@@ -20,7 +21,7 @@
             --primary-hover: #e62e5c;
             --text-dark: #f8f9fa;
             --text-light: #adb5bd;
-            --transition: all 0.2s ease;
+            --transition: all 0.3s ease;
             --dark-bg: #000000;
             --neon-red: #ff3366;
             --neon-glow: 0 0 10px var(--neon-red), 
@@ -423,7 +424,7 @@
             background-color: rgba(255, 51, 102, 0.3);
         }
 
-        /* Enhanced Sidebar Styles */
+        /* Enhanced Sidebar Styles with Toggle */
         .sidebar {
             width: var(--sidebar-width);
             color: var(--sidebar-text);
@@ -432,12 +433,81 @@
             transition: var(--transition);
             overflow-y: auto;
             font-family: var(--font-dashboard);
+            z-index: 100;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar.collapsed .sidebar-title span,
+        .sidebar.collapsed .nav-link span {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-title {
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 12px 0;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            right: -15px;
+            top: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            z-index: 101;
+            transition: var(--transition);
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--primary-hover);
+            transform: scale(1.1);
+        }
+
+        .sidebar-toggle i {
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+
+        /* Retro IMMORTAL text in sidebar */
+        .sidebar-title span {
+            font-family: var(--font-game);
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        /* Retro IMMORTAL text in main content */
+        .game-title-retro {
+            font-family: var(--font-game);
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--neon-red);
+            margin-bottom: 1rem;
+            font-size: 2rem;
         }
 
         .sidebar-header {
             padding: 20px;
             border-bottom: var(--glass-border);
             margin-bottom: 10px;
+            position: relative;
         }
 
         .sidebar-title {
@@ -511,7 +581,12 @@
             margin-left: var(--sidebar-width);
             min-height: 100vh;
             padding: 20px;
+            transition: var(--transition);
             font-family: var(--font-dashboard);
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed-width);
         }
 
         .content-header {
@@ -571,6 +646,16 @@
             line-height: 1.6;
         }
 
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
         /* Responsive Styles */
         @media (max-width: 768px) {
             .game-title {
@@ -579,11 +664,19 @@
             
             .sidebar {
                 transform: translateX(-100%);
-                z-index: 100;
             }
 
             .sidebar.active {
                 transform: translateX(0);
+            }
+
+            .sidebar.collapsed {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active.collapsed {
+                transform: translateX(0);
+                width: var(--sidebar-collapsed-width);
             }
 
             .main-content {
@@ -592,11 +685,6 @@
 
             .mobile-menu-toggle {
                 display: block;
-                background: none;
-                border: none;
-                font-size: 1.25rem;
-                color: var(--text-dark);
-                cursor: pointer;
             }
 
             .user-avatar {
@@ -607,6 +695,10 @@
             .notification-popup {
                 width: 90%;
                 max-width: 350px;
+            }
+
+            .game-title-retro {
+                font-size: 1.5rem;
             }
         }
 
@@ -687,14 +779,16 @@
         <div class="overlay" id="overlay"></div>
 
         <!-- Sidebar Navigation -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
             <div class="sidebar-header">
                 <div class="sidebar-title">
                     <i class="fas fa-gamepad"></i>
                     <span>IMMORTAL</span>
                 </div>
             </div>
-
             <nav class="nav-menu">
                 <ul>
                     <li class="nav-item active">
@@ -728,7 +822,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="content-header">
-                <button class="mobile-menu-toggle hidden">
+                <button class="mobile-menu-toggle hidden" id="mobileMenuToggle">
                     <i class="fas fa-bars"></i>
                 </button>
                 <h1 class="page-title">Dashboard</h1>
@@ -744,6 +838,7 @@
             </header>
 
             <div class="content">
+                <h1 class="game-title-retro">IMMORTAL</h1>
                 <h2>Welcome back, <span id="username">User</span>!</h2>
                 <p>This is your dark glass-themed dashboard with red accents.</p>
             </div>
@@ -773,6 +868,9 @@
         const nextNotification = document.getElementById('nextNotification');
         const notificationBadge = document.getElementById('notificationBadge');
         const notificationContent = document.getElementById('notificationContent');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 
         // Enhanced Notification System
         let currentNotificationIndex = 0;
@@ -876,6 +974,7 @@
             e.preventDefault();
             // Clear any stored user data
             localStorage.removeItem('discordUser');
+            localStorage.removeItem('sidebarCollapsed');
             // Return to login page
             dashboard.style.display = 'none';
             loginPage.style.display = 'flex';
@@ -886,6 +985,57 @@
             notificationPopup.classList.remove('show');
             overlay.classList.remove('show');
         });
+
+        // Sidebar Toggle Functionality
+        function initSidebarToggle() {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                
+                // Store sidebar state in localStorage
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            });
+            
+            // Check for saved sidebar state
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            if (savedState === 'true') {
+                sidebar.classList.add('collapsed');
+            }
+        }
+
+        // Mobile Menu Toggle Functionality
+        function initMobileMenu() {
+            function checkScreenSize() {
+                if (window.innerWidth <= 768) {
+                    mobileMenuToggle.classList.remove('hidden');
+                    sidebar.classList.remove('collapsed');
+                } else {
+                    mobileMenuToggle.classList.add('hidden');
+                }
+            }
+
+            // Initial check
+            checkScreenSize();
+
+            // Check on resize
+            window.addEventListener('resize', checkScreenSize);
+
+            // Toggle sidebar
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+        }
+
+        // Set active nav item
+        function initNavItems() {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
 
         // Check for Discord auth response in URL
         function checkAuthResponse() {
@@ -961,49 +1111,15 @@
             });
         }
 
-        // Mobile menu toggle functionality
-        function initMobileMenu() {
-            const mobileToggle = document.querySelector('.mobile-menu-toggle');
-            const sidebar = document.querySelector('.sidebar');
-
-            // Show mobile toggle button on small screens
-            function checkScreenSize() {
-                if (window.innerWidth <= 768) {
-                    mobileToggle.classList.remove('hidden');
-                } else {
-                    mobileToggle.classList.add('hidden');
-                    sidebar.classList.remove('active');
-                }
-            }
-
-            // Initial check
-            checkScreenSize();
-
-            // Check on resize
-            window.addEventListener('resize', checkScreenSize);
-
-            // Toggle sidebar
-            mobileToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('active');
-            });
-
-            // Set active nav item
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItems.forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-        }
-
         // Initialize the app
         function init() {
             checkExistingSession();
             checkAuthResponse();
             initDiscordLogin();
+            initSidebarToggle();
             initMobileMenu();
-            updateNotificationDisplay(); // Initialize notification display
+            initNavItems();
+            updateNotificationDisplay();
         }
 
         // Start the app
