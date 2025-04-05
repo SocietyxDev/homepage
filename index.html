@@ -433,7 +433,7 @@
             transition: var(--transition);
             overflow-y: auto;
             font-family: var(--font-dashboard);
-            z-index: 100;
+            z-index: 1000;
         }
 
         .sidebar.collapsed {
@@ -455,9 +455,10 @@
             padding: 12px 0;
         }
 
+        /* Fixed Sidebar Toggle Button */
         .sidebar-toggle {
             position: absolute;
-            right: -15px;
+            right: -12px;
             top: 20px;
             background: var(--primary);
             color: white;
@@ -469,18 +470,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
             z-index: 101;
             transition: var(--transition);
+            border: 2px solid var(--sidebar-bg);
         }
 
         .sidebar-toggle:hover {
             background: var(--primary-hover);
             transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.7);
         }
 
         .sidebar-toggle i {
             transition: var(--transition);
+            font-size: 0.9rem;
         }
 
         .sidebar.collapsed .sidebar-toggle i {
@@ -699,6 +703,17 @@
 
             .game-title-retro {
                 font-size: 1.5rem;
+            }
+
+            /* Mobile adjustments for sidebar toggle */
+            .sidebar-toggle {
+                right: -15px;
+                width: 32px;
+                height: 32px;
+            }
+            
+            .sidebar-toggle i {
+                font-size: 1rem;
             }
         }
 
