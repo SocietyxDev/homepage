@@ -979,25 +979,25 @@
             <nav class="nav-menu">
                 <ul>
                     <li class="nav-item active">
-                        <a href="#" class="nav-link">
+                        <a href="index.html" class="nav-link">
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="Hits.html" class="nav-link">
                             <i class="fas fa-bullseye"></i>
                             <span>Hits</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="Tools.html" class="nav-link">
                             <i class="fas fa-tools"></i>
                             <span>Tools</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="Settings.html" class="nav-link">
                             <i class="fas fa-cog"></i>
                             <span>Settings</span>
                         </a>
@@ -1073,9 +1073,9 @@
 
     <script>
         // Discord OAuth Configuration
-        const DISCORD_CLIENT_ID = "1355364009876127863";
+        const DISCORD_CLIENT_ID = "1345573828956520528";
         const DISCORD_REDIRECT_URI = window.location.href.includes('localhost') ? 
-            "http://localhost:8000" : "https://immortalsite.vercel.app/";
+            "http://localhost:8000" : "https://homepage-nu-beige.vercel.app/";
         const DISCORD_SCOPES = ["identify"];
 
         // DOM Elements
@@ -1287,6 +1287,7 @@
             // Clear any stored user data
             localStorage.removeItem('discordUser');
             localStorage.removeItem('sidebarCollapsed');
+            localStorage.removeItem('profileData');
             // Return to login page
             dashboard.style.display = 'none';
             loginPage.style.display = 'flex';
@@ -1339,15 +1340,53 @@
             });
         }
 
-        // Set active nav item
+        // Set active nav item and handle navigation
         function initNavItems() {
             const navItems = document.querySelectorAll('.nav-item');
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            
             navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItems.forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
+                const link = item.querySelector('.nav-link');
+                const href = link.getAttribute('href');
+                
+                // Set active state based on current page
+                if ((currentPage === 'index.html' && href === 'index.html') ||
+                    (currentPage === 'Hits.html' && href === 'Hits.html') ||
+                    (currentPage === 'Tools.html' && href === 'Tools.html') ||
+                    (currentPage === 'Settings.html' && href === 'Settings.html')) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+                
+                // Handle navigation while preserving the active state
+                link.addEventListener('click', function(e) {
+                    if (href !== currentPage) {
+                        // Store the active state in localStorage
+                        localStorage.setItem('activeNavItem', href);
+                        
+                        // If it's the same origin, let the link work normally
+                        if (e.currentTarget.hostname === window.location.hostname) {
+                            return true;
+                        }
+                    }
+                    // Prevent default for same-page links
+                    e.preventDefault();
                 });
             });
+            
+            // Restore active state from localStorage if needed
+            const savedActiveItem = localStorage.getItem('activeNavItem');
+            if (savedActiveItem) {
+                navItems.forEach(item => {
+                    const link = item.querySelector('.nav-link');
+                    if (link.getAttribute('href') === savedActiveItem) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
         }
 
         // Check for Discord auth response in URL
