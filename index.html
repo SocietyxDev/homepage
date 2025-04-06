@@ -650,6 +650,161 @@
             line-height: 1.6;
         }
 
+        /* Profile Page Styles */
+        .profile-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            bottom: 0;
+            background-color: var(--content-bg);
+            z-index: 999;
+            padding: 20px;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed ~ .main-content .profile-page {
+            left: var(--sidebar-collapsed-width);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: var(--glass-border);
+        }
+
+        .profile-header h2 {
+            margin-left: 20px;
+            color: var(--primary);
+        }
+
+        .back-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .profile-content {
+            display: flex;
+            gap: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .avatar-section {
+            flex: 1;
+            max-width: 250px;
+            text-align: center;
+        }
+
+        .avatar-preview {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 20px;
+            border: 3px solid var(--primary);
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .change-avatar-btn {
+            background-color: rgba(255, 51, 102, 0.2);
+            color: var(--text-dark);
+            border: 1px dashed var(--primary);
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto;
+            transition: var(--transition);
+        }
+
+        .change-avatar-btn:hover {
+            background-color: rgba(255, 51, 102, 0.3);
+        }
+
+        .profile-form {
+            flex: 2;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: var(--glass-border);
+            border-radius: 5px;
+            color: var(--text-dark);
+            font-family: var(--font-dashboard);
+            transition: var(--transition);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(255, 51, 102, 0.3);
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        .save-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .save-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
         /* Mobile Menu Toggle */
         .mobile-menu-toggle {
             display: none;
@@ -714,6 +869,23 @@
             
             .sidebar-toggle i {
                 font-size: 1rem;
+            }
+
+            /* Profile page mobile adjustments */
+            .profile-content {
+                flex-direction: column;
+            }
+            
+            .avatar-section {
+                max-width: 100%;
+            }
+            
+            .profile-page {
+                left: 0;
+            }
+            
+            .sidebar.collapsed ~ .main-content .profile-page {
+                left: 0;
             }
         }
 
@@ -845,7 +1017,7 @@
                     <div class="profile-dropdown">
                         <img src="" alt="User Avatar" class="user-avatar" id="userAvatar">
                         <div class="profile-menu" id="profileMenu">
-                            <a href="#"><i class="fas fa-user"></i> Profile</a>
+                            <a href="#" id="profileBtn"><i class="fas fa-user"></i> Profile</a>
                             <a href="#" class="logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
                         </div>
                     </div>
@@ -858,13 +1030,52 @@
                 <p>This is your dark glass-themed dashboard with red accents.</p>
             </div>
         </main>
+
+        <!-- Profile Page (hidden by default) -->
+        <div class="profile-page" id="profilePage">
+            <div class="profile-header">
+                <button class="back-btn" id="backToDashboard">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+                <h2>Profile Settings</h2>
+            </div>
+            
+            <div class="profile-content">
+                <div class="avatar-section">
+                    <div class="avatar-preview">
+                        <img src="" alt="Current Avatar" id="currentAvatar">
+                    </div>
+                    <button class="change-avatar-btn" id="changeAvatarBtn">
+                        <i class="fas fa-camera"></i> Change Avatar
+                    </button>
+                    <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+                </div>
+                
+                <div class="profile-form">
+                    <div class="form-group">
+                        <label for="nickname">Nickname</label>
+                        <input type="text" id="nickname" placeholder="Enter your nickname">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="discordWebhook">Discord Webhook URL</label>
+                        <input type="text" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
+                        <small>For receiving announcements directly to your Discord server</small>
+                    </div>
+                    
+                    <button class="save-btn" id="saveProfileBtn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         // Discord OAuth Configuration
         const DISCORD_CLIENT_ID = "1345573828956520528";
         const DISCORD_REDIRECT_URI = window.location.href.includes('localhost') ? 
-            "http://localhost:8000" : "https://homepage-nu-beige.vercel.app/";
+            "http://localhost:8000" : "https://immortalsite.vercel.app/";
         const DISCORD_SCOPES = ["identify"];
 
         // DOM Elements
@@ -875,6 +1086,15 @@
         const usernameSpan = document.getElementById('username');
         const profileMenu = document.getElementById('profileMenu');
         const logoutBtn = document.getElementById('logoutBtn');
+        const profileBtn = document.getElementById('profileBtn');
+        const profilePage = document.getElementById('profilePage');
+        const backToDashboard = document.getElementById('backToDashboard');
+        const currentAvatar = document.getElementById('currentAvatar');
+        const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+        const avatarUpload = document.getElementById('avatarUpload');
+        const nicknameInput = document.getElementById('nickname');
+        const discordWebhookInput = document.getElementById('discordWebhook');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
         const notificationBtn = document.getElementById('notificationBtn');
         const notificationPopup = document.getElementById('notificationPopup');
         const notificationClose = document.getElementById('notificationClose');
@@ -984,6 +1204,83 @@
             }
         });
 
+        // Profile functionality
+        profileBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            profileMenu.classList.remove('show');
+            
+            // Show profile page
+            profilePage.style.display = 'block';
+            
+            // Load current profile data
+            loadProfileData();
+        });
+
+        backToDashboard.addEventListener('click', function() {
+            profilePage.style.display = 'none';
+        });
+
+        // Load profile data from localStorage
+        function loadProfileData() {
+            const profileData = JSON.parse(localStorage.getItem('profileData')) || {};
+            const discordUser = JSON.parse(localStorage.getItem('discordUser'));
+            
+            // Set current avatar
+            if (profileData.avatar) {
+                currentAvatar.src = profileData.avatar;
+            } else if (discordUser?.avatar) {
+                currentAvatar.src = `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=128`;
+            } else {
+                currentAvatar.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
+            }
+            
+            // Set nickname (default to Discord username if available)
+            nicknameInput.value = profileData.nickname || discordUser?.username || '';
+            
+            // Set webhook if exists
+            discordWebhookInput.value = profileData.discordWebhook || '';
+        }
+
+        // Change avatar
+        changeAvatarBtn.addEventListener('click', function() {
+            avatarUpload.click();
+        });
+
+        avatarUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    currentAvatar.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Save profile
+        saveProfileBtn.addEventListener('click', function() {
+            const profileData = {
+                avatar: currentAvatar.src,
+                nickname: nicknameInput.value,
+                discordWebhook: discordWebhookInput.value
+            };
+            
+            localStorage.setItem('profileData', JSON.stringify(profileData));
+            
+            // Update avatar in dashboard if changed
+            if (profileData.avatar && profileData.avatar.startsWith('data:')) {
+                userAvatar.src = profileData.avatar;
+            }
+
+            // Update username if changed
+            if (profileData.nickname) {
+                usernameSpan.textContent = profileData.nickname;
+            }
+            
+            // Show success message (you can enhance this with a proper notification)
+            alert('Profile saved successfully!');
+        });
+
         // Logout functionality
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -999,6 +1296,7 @@
             // Close any open popups
             notificationPopup.classList.remove('show');
             overlay.classList.remove('show');
+            profilePage.style.display = 'none';
         });
 
         // Sidebar Toggle Functionality
@@ -1107,7 +1405,29 @@
             }
             
             // Set username
-            usernameSpan.textContent = userData.username || 'User';
+            const profileData = JSON.parse(localStorage.getItem('profileData')) || {};
+            usernameSpan.textContent = profileData.nickname || userData.username || 'User';
+        }
+
+        // Initialize profile data when dashboard loads
+        function initProfile() {
+            const storedUser = localStorage.getItem('discordUser');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                const profileData = JSON.parse(localStorage.getItem('profileData')) || {};
+                
+                // Set initial avatar
+                if (profileData.avatar) {
+                    userAvatar.src = profileData.avatar;
+                } else if (userData.avatar) {
+                    userAvatar.src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=128`;
+                } else {
+                    userAvatar.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
+                }
+                
+                // Set initial username
+                usernameSpan.textContent = profileData.nickname || userData.username || 'User';
+            }
         }
 
         // Check for existing session on page load
@@ -1135,6 +1455,7 @@
             initMobileMenu();
             initNavItems();
             updateNotificationDisplay();
+            initProfile();
         }
 
         // Start the app
