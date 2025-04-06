@@ -1159,3 +1159,252 @@
             notificationPopup.classList.remove('show');
             overlay.classList.remove('show');
         });
+
+        overlay.addEventListener('click', function() {
+            notificationPopup.classList.remove('show');
+            overlay.classList.remove('show');
+            profileMenu.classList.remove('show');
+        });
+
+        // Navigation buttons
+        prevNotification.addEventListener('click', function() {
+            if (currentNotificationIndex > 0) {
+                currentNotificationIndex--;
+                updateNotificationDisplay();
+            }
+        });
+
+        nextNotification.addEventListener('click', function() {
+            if (currentNotificationIndex < notifications.length - 1) {
+                currentNotificationIndex++;
+                updateNotificationDisplay();
+            }
+        });
+
+        function updateNotificationDisplay() {
+            const notification = notifications[currentNotificationIndex];
+            notificationContent.innerHTML = `
+                <div class="notification-item">
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-time">${notification.time}</div>
+                    <div class="notification-message">${notification.message}</div>
+                </div>
+            `;
+            
+            // Update button states
+            prevNotification.disabled = currentNotificationIndex === 0;
+            nextNotification.disabled = currentNotificationIndex === notifications.length - 1;
+            
+            // Update badge if viewing the last notification
+            if (currentNotificationIndex === notifications.length - 1) {
+                notificationBadge.textContent = '0';
+                notificationBadge.style.display = 'none';
+            } else {
+                notificationBadge.textContent = (notifications.length - currentNotificationIndex - 1).toString();
+                notificationBadge.style.display = 'flex';
+            }
+        }
+
+        // Enhanced Profile Dropdown
+        userAvatar.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profileMenu.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.profile-dropdown') && profileMenu.classList.contains('show')) {
+                profileMenu.classList.remove('show');
+            }
+        });
+
+        // Profile functionality
+        profileBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            profileMenu.classList.remove('show');
+            
+            // Show profile page
+            profilePage.style.display = 'block';
+            
+            // Load current profile data
+            loadProfileData();
+        });
+
+        backToDashboard.addEventListener('click', function() {
+            profilePage.style.display = 'none';
+        });
+
+        // Load profile data from localStorage
+        function loadProfileData() {
+            const profileData = JSON.parse(localStorage.getItem('profileData')) || {};
+            const discordUser = JSON.parse(localStorage.getItem('discordUser'));
+            
+            // Set current avatar
+            if (profileData.avatar) {
+                currentAvatar.src = profileData.avatar;
+            } else if (discordUser?.avatar) {
+                currentAvatar.src = `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=128`;
+            } else {
+                currentAvatar.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
+            }
+            
+            // Set nickname (default to Discord username if available)
+            nicknameInput.value = profileData.nickname || discordUser?.username || '';
+            
+            // Set webhook if exists
+            discordWebhookInput.value = profileData.discordWebhook || '';
+        }
+
+        // Change avatar
+        changeAvatarBtn.addEventListener('click', function() {
+            avatarUpload.click();
+        });
+
+        avatarUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    currentAvatar.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Save profile
+        saveProfileBtn.addEventListener('click', function() {
+            const profileData = {
+                avatar: currentAvatar.src,
+                nickname: nicknameInput.value,
+                discordWebhook: discordWebhookInput.value
+            };
+            
+            localStorage.setItem('profileData', JSON.stringify(profileData));
+            
+            // Update avatar in dashboard if changed
+            if (profileData.avatar && profileData.avatar.startsWith('data:')) {
+                userAvatar.src = profileData.avatar;
+            }
+
+            // Update username if changed
+            if (profileData.nickname) {
+                usernameSpan.textContent = profileData.nickname;
+            }
+            
+            // Show success message (you can enhance this with a proper notification)
+            alert('Profile saved successfully!');
+        });
+
+        // Logout functionality
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Clear any stored user data
+            localStorage.removeItem('discordUser');
+            localStorage.removeItem('sidebarCollapsed');
+            localStorage.removeItem('profileData');
+            // Redirect to login page
+            window.location.href = 'index.html';
+        });
+
+        // Sidebar Toggle Functionality
+        function initSidebarToggle() {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                
+                // Store sidebar state in localStorage
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            });
+            
+            // Check for saved sidebar state
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            if (savedState === 'true') {
+                sidebar.classList.add('collapsed');
+            }
+        }
+
+        // Mobile Menu Toggle Functionality
+        function initMobileMenu() {
+            function checkScreenSize() {
+                if (window.innerWidth <= 768) {
+                    mobileMenuToggle.classList.remove('hidden');
+                    sidebar.classList.remove('collapsed');
+                } else {
+                    mobileMenuToggle.classList.add('hidden');
+                }
+            }
+
+            // Initial check
+            checkScreenSize();
+
+            // Check on resize
+            window.addEventListener('resize', checkScreenSize);
+
+            // Toggle sidebar
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+        }
+
+        // Set active nav item and handle navigation
+        function initNavItems() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            
+            navItems.forEach(item => {
+                const link = item.querySelector('.nav-link');
+                const href = link.getAttribute('href');
+                
+                // Set active state based on current page
+                if ((currentPage === 'index.html' && href === 'index.html') ||
+                    (currentPage === 'Hits.html' && href === 'Hits.html') ||
+                    (currentPage === 'Tools.html' && href === 'Tools.html') ||
+                    (currentPage === 'Settings.html' && href === 'Settings.html')) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // Initialize profile data when dashboard loads
+        function initProfile() {
+            const storedUser = localStorage.getItem('discordUser');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                const profileData = JSON.parse(localStorage.getItem('profileData')) || {};
+                
+                // Set initial avatar
+                if (profileData.avatar) {
+                    userAvatar.src = profileData.avatar;
+                } else if (userData.avatar) {
+                    userAvatar.src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=128`;
+                } else {
+                    userAvatar.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
+                }
+                
+                // Set initial username
+                usernameSpan.textContent = profileData.nickname || userData.username || 'User';
+            } else {
+                // If no user data found, redirect to login
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Initialize the app
+        function init() {
+            initSidebarToggle();
+            initMobileMenu();
+            initNavItems();
+            updateNotificationDisplay();
+            initProfile();
+            
+            // Show dashboard (since we're already logged in)
+            dashboard.style.display = 'block';
+        }
+
+        // Start the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
