@@ -979,25 +979,25 @@
             <nav class="nav-menu">
                 <ul>
                     <li class="nav-item active">
-                        <a href="index.html" class="nav-link">
+                        <a href="#" class="nav-link">
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="Hits.html" class="nav-link">
+                        <a href="#" class="nav-link">
                             <i class="fas fa-bullseye"></i>
                             <span>Hits</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="Tools.html" class="nav-link">
+                        <a href="#" class="nav-link">
                             <i class="fas fa-tools"></i>
                             <span>Tools</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="Settings.html" class="nav-link">
+                        <a href="#" class="nav-link">
                             <i class="fas fa-cog"></i>
                             <span>Settings</span>
                         </a>
@@ -1287,7 +1287,6 @@
             // Clear any stored user data
             localStorage.removeItem('discordUser');
             localStorage.removeItem('sidebarCollapsed');
-            localStorage.removeItem('profileData');
             // Return to login page
             dashboard.style.display = 'none';
             loginPage.style.display = 'flex';
@@ -1340,53 +1339,15 @@
             });
         }
 
-        // Set active nav item and handle navigation
+        // Set active nav item
         function initNavItems() {
             const navItems = document.querySelectorAll('.nav-item');
-            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-            
             navItems.forEach(item => {
-                const link = item.querySelector('.nav-link');
-                const href = link.getAttribute('href');
-                
-                // Set active state based on current page
-                if ((currentPage === 'index.html' && href === 'index.html') ||
-                    (currentPage === 'Hits.html' && href === 'Hits.html') ||
-                    (currentPage === 'Tools.html' && href === 'Tools.html') ||
-                    (currentPage === 'Settings.html' && href === 'Settings.html')) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
-                
-                // Handle navigation while preserving the active state
-                link.addEventListener('click', function(e) {
-                    if (href !== currentPage) {
-                        // Store the active state in localStorage
-                        localStorage.setItem('activeNavItem', href);
-                        
-                        // If it's the same origin, let the link work normally
-                        if (e.currentTarget.hostname === window.location.hostname) {
-                            return true;
-                        }
-                    }
-                    // Prevent default for same-page links
-                    e.preventDefault();
+                item.addEventListener('click', function() {
+                    navItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
                 });
             });
-            
-            // Restore active state from localStorage if needed
-            const savedActiveItem = localStorage.getItem('activeNavItem');
-            if (savedActiveItem) {
-                navItems.forEach(item => {
-                    const link = item.querySelector('.nav-link');
-                    if (link.getAttribute('href') === savedActiveItem) {
-                        item.classList.add('active');
-                    } else {
-                        item.classList.remove('active');
-                    }
-                });
-            }
         }
 
         // Check for Discord auth response in URL
