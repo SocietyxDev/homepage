@@ -1024,10 +1024,41 @@
                 </div>
             </header>
 
-            <div class="content">
+            <!-- Dashboard Content (default) -->
+            <div class="content" id="dashboardContent">
                 <h1 class="game-title-retro">IMMORTAL</h1>
                 <h2>Welcome back, <span id="username">User</span>!</h2>
                 <p>This is your dark glass-themed dashboard with red accents.</p>
+            </div>
+
+            <!-- Hits Content -->
+            <div class="content hidden" id="hitsContent">
+                <h1 class="game-title-retro">HITS</h1>
+                <h2>Your Hits Dashboard</h2>
+                <p>This section would display your hits information.</p>
+                <div class="hits-stats">
+                    <!-- Add your hits statistics/content here -->
+                </div>
+            </div>
+
+            <!-- Tools Content -->
+            <div class="content hidden" id="toolsContent">
+                <h1 class="game-title-retro">TOOLS</h1>
+                <h2>Available Tools</h2>
+                <p>This section would display your available tools.</p>
+                <div class="tools-grid">
+                    <!-- Add your tools content here -->
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="content hidden" id="settingsContent">
+                <h1 class="game-title-retro">SETTINGS</h1>
+                <h2>Configuration Panel</h2>
+                <p>This section would display your settings options.</p>
+                <div class="settings-options">
+                    <!-- Add your settings content here -->
+                </div>
             </div>
         </main>
 
@@ -1106,6 +1137,12 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+
+        // Content Sections
+        const dashboardContent = document.getElementById('dashboardContent');
+        const hitsContent = document.getElementById('hitsContent');
+        const toolsContent = document.getElementById('toolsContent');
+        const settingsContent = document.getElementById('settingsContent');
 
         // Enhanced Notification System
         let currentNotificationIndex = 0;
@@ -1286,6 +1323,7 @@
             e.preventDefault();
             // Clear any stored user data
             localStorage.removeItem('discordUser');
+            localStorage.removeItem('profileData');
             localStorage.removeItem('sidebarCollapsed');
             // Return to login page
             dashboard.style.display = 'none';
@@ -1339,13 +1377,50 @@
             });
         }
 
-        // Set active nav item
-        function initNavItems() {
+        // Navigation between dashboard sections
+        function initContentNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
             const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItems.forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
+            const pageTitle = document.querySelector('.page-title');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all nav items
+                    navItems.forEach(item => item.classList.remove('active'));
+                    
+                    // Add active class to clicked item's parent
+                    this.parentElement.classList.add('active');
+                    
+                    // Get which section to show from the link's text
+                    const sectionText = this.querySelector('span').textContent.toLowerCase();
+                    
+                    // Hide all content sections
+                    dashboardContent.classList.add('hidden');
+                    hitsContent.classList.add('hidden');
+                    toolsContent.classList.add('hidden');
+                    settingsContent.classList.add('hidden');
+                    
+                    // Show the selected section and update page title
+                    switch(sectionText) {
+                        case 'hits':
+                            hitsContent.classList.remove('hidden');
+                            pageTitle.textContent = 'Hits';
+                            break;
+                        case 'tools':
+                            toolsContent.classList.remove('hidden');
+                            pageTitle.textContent = 'Tools';
+                            break;
+                        case 'settings':
+                            settingsContent.classList.remove('hidden');
+                            pageTitle.textContent = 'Settings';
+                            break;
+                        default: // dashboard
+                            dashboardContent.classList.remove('hidden');
+                            pageTitle.textContent = 'Dashboard';
+                            break;
+                    }
                 });
             });
         }
@@ -1453,7 +1528,7 @@
             initDiscordLogin();
             initSidebarToggle();
             initMobileMenu();
-            initNavItems();
+            initContentNavigation();
             updateNotificationDisplay();
             initProfile();
         }
