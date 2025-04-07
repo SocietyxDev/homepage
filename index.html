@@ -889,6 +889,194 @@
             cursor: pointer;
         }
 
+        /* Video Tutorial Grid Styles */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .video-card {
+            background: rgba(15, 15, 25, 0.7);
+            border-radius: 8px;
+            overflow: hidden;
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 51, 102, 0.3);
+            border-color: rgba(255, 51, 102, 0.5);
+        }
+
+        .video-thumbnail {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        .video-thumbnail img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            transition: var(--transition);
+        }
+
+        .video-card:hover .video-thumbnail img {
+            opacity: 1;
+        }
+
+        .video-thumbnail .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 3rem;
+            opacity: 0.8;
+            text-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+            transition: var(--transition);
+        }
+
+        .video-card:hover .play-icon {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .video-info {
+            padding: 15px;
+        }
+
+        .video-info h3 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .video-info p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-info .meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        /* Video Upload Form Styles */
+        .upload-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(15, 15, 25, 0.5);
+            border-radius: 10px;
+            border: var(--glass-border);
+        }
+
+        .upload-section h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 51, 102, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .upload-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .upload-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .upload-form input,
+        .upload-form textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: var(--glass-border);
+            border-radius: 5px;
+            color: var(--text-dark);
+            font-family: var(--font-dashboard);
+        }
+
+        .upload-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .upload-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Video Modal Styles */
+        .video-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .video-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .video-modal-content {
+            width: 80%;
+            max-width: 1000px;
+            position: relative;
+        }
+
+        .video-modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .video-modal-player {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+
         /* Responsive Styles */
         @media (max-width: 768px) {
             .game-title {
@@ -961,6 +1149,15 @@
             .sidebar.collapsed ~ .main-content .profile-page {
                 left: 0;
             }
+
+            /* Video grid adjustments */
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .video-modal-content {
+                width: 95%;
+            }
         }
 
         @media (max-width: 480px) {
@@ -971,6 +1168,10 @@
             .discord-login-btn {
                 padding: 14px 24px;
                 font-size: 0.9rem;
+            }
+
+            .upload-actions {
+                flex-direction: column;
             }
         }
 
@@ -1108,10 +1309,54 @@
             <!-- Hits Content -->
             <div class="content hidden" id="hitsContent">
                 <h1 class="game-title-retro">HITS</h1>
-                <h2>Your Hits Dashboard</h2>
-                <p>This section would display your hits information.</p>
-                <div class="hits-stats">
-                    <!-- Add your hits statistics/content here -->
+                <h2>Video Tutorials</h2>
+                <p>Watch and learn from our collection of tutorial videos.</p>
+                
+                <div class="video-grid" id="videoGrid">
+                    <!-- Video cards will be added here dynamically -->
+                </div>
+                
+                <!-- Admin Upload Section (would be hidden for regular users in production) -->
+                <div class="upload-section">
+                    <h3>Upload New Tutorial</h3>
+                    <form class="upload-form" id="videoUploadForm">
+                        <div class="form-group">
+                            <label for="videoTitle">Video Title</label>
+                            <input type="text" id="videoTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="videoDescription">Description</label>
+                            <textarea id="videoDescription" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="videoFile">Video File</label>
+                            <input type="file" id="videoFile" accept="video/*" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="videoThumbnail">Thumbnail Image (optional)</label>
+                            <input type="file" id="videoThumbnail" accept="image/*">
+                        </div>
+                        <div class="upload-actions">
+                            <button type="submit" class="video-upload-btn">
+                                <i class="fas fa-upload"></i> Upload Video
+                            </button>
+                            <button type="reset" class="video-upload-btn" style="background: rgba(255, 51, 102, 0.2);">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Video Modal -->
+                <div class="video-modal" id="videoModal">
+                    <div class="video-modal-content">
+                        <button class="video-modal-close" id="videoModalClose">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="video-modal-player">
+                            <video controls id="modalVideoPlayer"></video>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1221,6 +1466,11 @@
         const successPopup = document.getElementById('successPopup');
         const successPopupBtn = document.getElementById('successPopupBtn');
         const successMessage = document.getElementById('successMessage');
+        const videoGrid = document.getElementById('videoGrid');
+        const videoUploadForm = document.getElementById('videoUploadForm');
+        const videoModal = document.getElementById('videoModal');
+        const videoModalClose = document.getElementById('videoModalClose');
+        const modalVideoPlayer = document.getElementById('modalVideoPlayer');
 
         // Content Sections
         const dashboardContent = document.getElementById('dashboardContent');
@@ -1253,46 +1503,185 @@
             }
         ];
 
-        // Toggle notification popup
-        notificationBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            notificationPopup.classList.add('show');
-            overlay.classList.add('show');
+        // Video Tutorial System
+        let videos = [
+            {
+                id: '1',
+                title: 'Getting Started with IMMORTAL',
+                description: 'Learn the basics of using our platform and its core features.',
+                videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnailUrl: 'https://via.placeholder.com/400x225/1a1a2e/ff3366?text=IMMORTAL+Tutorial',
+                uploadDate: '2023-05-15',
+                duration: '4:32'
+            },
+            {
+                id: '2',
+                title: 'Advanced Hit Techniques',
+                description: 'Master advanced techniques for maximum efficiency in your operations.',
+                videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnailUrl: 'https://via.placeholder.com/400x225/1a1a2e/ff3366?text=Advanced+Techniques',
+                uploadDate: '2023-06-02',
+                duration: '7:45'
+            }
+        ];
+
+        // Initialize the app
+        function init() {
+            checkExistingSession();
+            checkAuthResponse();
+            initDiscordLogin();
+            initSidebarToggle();
+            initMobileMenu();
+            initContentNavigation();
             updateNotificationDisplay();
-        });
+            initProfile();
+            initVideoSystem();
+            loadSavedVideos();
+        }
 
-        // Close notification popup
-        notificationClose.addEventListener('click', function() {
-            notificationPopup.classList.remove('show');
-            overlay.classList.remove('show');
-        });
+        // Video System Functions
+        function initVideoSystem() {
+            renderVideoGrid();
+            setupVideoEventListeners();
+        }
 
-        overlay.addEventListener('click', function() {
-            notificationPopup.classList.remove('show');
-            profileMenu.classList.remove('show');
+        function renderVideoGrid() {
+            videoGrid.innerHTML = '';
             
-            if (successPopup.classList.contains('show')) {
-                successPopup.classList.remove('show');
+            if (videos.length === 0) {
+                videoGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No tutorial videos available yet.</p>';
+                return;
             }
             
-            overlay.classList.remove('show');
-        });
+            videos.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'video-card';
+                videoCard.dataset.videoId = video.id;
+                
+                videoCard.innerHTML = `
+                    <div class="video-thumbnail">
+                        <img src="${video.thumbnailUrl}" alt="${video.title}">
+                        <div class="play-icon">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                    <div class="video-info">
+                        <h3>${video.title}</h3>
+                        <p>${video.description}</p>
+                        <div class="meta">
+                            <span>${video.duration}</span>
+                            <span>${video.uploadDate}</span>
+                        </div>
+                    </div>
+                `;
+                
+                videoGrid.appendChild(videoCard);
+            });
+        }
 
-        // Navigation buttons
-        prevNotification.addEventListener('click', function() {
-            if (currentNotificationIndex > 0) {
-                currentNotificationIndex--;
-                updateNotificationDisplay();
+        function setupVideoEventListeners() {
+            // Video card clicks
+            videoGrid.addEventListener('click', (e) => {
+                const videoCard = e.target.closest('.video-card');
+                if (videoCard) {
+                    const videoId = videoCard.dataset.videoId;
+                    const video = videos.find(v => v.id === videoId);
+                    if (video) {
+                        playVideo(video);
+                    }
+                }
+            });
+            
+            // Modal close
+            videoModalClose.addEventListener('click', closeVideoModal);
+            
+            // Form submission
+            videoUploadForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                uploadVideo();
+            });
+            
+            // Close modal when clicking outside
+            videoModal.addEventListener('click', (e) => {
+                if (e.target === videoModal) {
+                    closeVideoModal();
+                }
+            });
+        }
+
+        function playVideo(video) {
+            modalVideoPlayer.src = video.videoUrl;
+            modalVideoPlayer.poster = video.thumbnailUrl;
+            videoModal.classList.add('active');
+            modalVideoPlayer.play();
+        }
+
+        function closeVideoModal() {
+            videoModal.classList.remove('active');
+            modalVideoPlayer.pause();
+            modalVideoPlayer.currentTime = 0;
+        }
+
+        function uploadVideo() {
+            const title = document.getElementById('videoTitle').value;
+            const description = document.getElementById('videoDescription').value;
+            const videoFile = document.getElementById('videoFile').files[0];
+            const thumbnailFile = document.getElementById('videoThumbnail').files[0];
+            
+            if (!title || !description || !videoFile) {
+                alert('Please fill in all required fields');
+                return;
             }
-        });
-
-        nextNotification.addEventListener('click', function() {
-            if (currentNotificationIndex < notifications.length - 1) {
-                currentNotificationIndex++;
-                updateNotificationDisplay();
+            
+            // In a real app, you would upload to a server here
+            // For this demo, we'll simulate with a local object URL
+            const videoUrl = URL.createObjectURL(videoFile);
+            let thumbnailUrl = 'https://via.placeholder.com/400x225/1a1a2e/ff3366?text=' + encodeURIComponent(title);
+            
+            if (thumbnailFile) {
+                thumbnailUrl = URL.createObjectURL(thumbnailFile);
             }
-        });
+            
+            // Create new video object
+            const newVideo = {
+                id: Date.now().toString(),
+                title,
+                description,
+                videoUrl,
+                thumbnailUrl,
+                uploadDate: new Date().toLocaleDateString(),
+                duration: '0:00' // Would calculate this in a real app
+            };
+            
+            // Add to videos array
+            videos.unshift(newVideo);
+            
+            // Save to localStorage
+            saveVideos();
+            
+            // Re-render grid
+            renderVideoGrid();
+            
+            // Reset form
+            videoUploadForm.reset();
+            
+            // Show success message
+            showSuccessMessage('Video uploaded successfully!');
+        }
 
+        function saveVideos() {
+            localStorage.setItem('tutorialVideos', JSON.stringify(videos));
+        }
+
+        function loadSavedVideos() {
+            const savedVideos = localStorage.getItem('tutorialVideos');
+            if (savedVideos) {
+                videos = JSON.parse(savedVideos);
+                renderVideoGrid();
+            }
+        }
+
+        // Notification System
         function updateNotificationDisplay() {
             const notification = notifications[currentNotificationIndex];
             notificationContent.innerHTML = `
@@ -1428,6 +1817,7 @@
             localStorage.removeItem('discordUser');
             localStorage.removeItem('profileData');
             localStorage.removeItem('sidebarCollapsed');
+            localStorage.removeItem('tutorialVideos');
             // Return to login page
             dashboard.style.display = 'none';
             loginPage.style.display = 'flex';
@@ -1439,6 +1829,7 @@
             overlay.classList.remove('show');
             profilePage.style.display = 'none';
             successPopup.classList.remove('show');
+            videoModal.classList.remove('active');
         });
 
         // Sidebar Toggle Functionality
@@ -1625,16 +2016,15 @@
             });
         }
 
-        // Initialize the app
-        function init() {
-            checkExistingSession();
-            checkAuthResponse();
-            initDiscordLogin();
-            initSidebarToggle();
-            initMobileMenu();
-            initContentNavigation();
-            updateNotificationDisplay();
-            initProfile();
+        function showSuccessMessage(message) {
+            successMessage.textContent = message;
+            successPopup.classList.add('show');
+            overlay.classList.add('show');
+            
+            setTimeout(() => {
+                successPopup.classList.remove('show');
+                overlay.classList.remove('show');
+            }, 3000);
         }
 
         // Start the app
