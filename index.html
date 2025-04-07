@@ -658,15 +658,38 @@
             left: var(--sidebar-width);
             right: 0;
             bottom: 0;
-            background-color: var(--content-bg);
+            background-color: rgba(0, 0, 0, 0.7);
             z-index: 999;
             padding: 20px;
             overflow-y: auto;
             transition: var(--transition);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            opacity: 0;
+            transform: translateY(20px);
         }
 
         .sidebar.collapsed ~ .main-content .profile-page {
             left: var(--sidebar-collapsed-width);
+        }
+
+        .profile-page.show {
+            display: block;
+            animation: profileFadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes profileFadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .profile-page.hide {
+            animation: profileFadeOut 0.3s ease-out forwards;
+        }
+
+        @keyframes profileFadeOut {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(20px); }
         }
 
         .profile-header {
@@ -704,6 +727,11 @@
             gap: 40px;
             max-width: 800px;
             margin: 0 auto;
+            background: var(--content-bg);
+            padding: 30px;
+            border-radius: 10px;
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow);
         }
 
         .avatar-section {
@@ -803,6 +831,54 @@
         .save-btn:hover {
             background-color: var(--primary-hover);
             transform: translateY(-2px);
+        }
+
+        /* Success Popup */
+        .success-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--sidebar-bg);
+            backdrop-filter: var(--glass-backdrop);
+            -webkit-backdrop-filter: var(--glass-backdrop);
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1002;
+            display: none;
+            text-align: center;
+            max-width: 300px;
+            width: 90%;
+        }
+
+        .success-popup.show {
+            display: block;
+            animation: popIn 0.3s ease-out;
+        }
+
+        .success-popup h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .success-popup p {
+            margin-bottom: 20px;
+        }
+
+        .success-popup-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .success-popup-btn:hover {
+            background-color: var(--primary-hover);
         }
 
         /* Mobile Menu Toggle */
@@ -1100,6 +1176,13 @@
                 </div>
             </div>
         </div>
+
+        <!-- Success Popup -->
+        <div class="success-popup" id="successPopup">
+            <h3>Success!</h3>
+            <p id="successMessage">Profile saved successfully!</p>
+            <button class="success-popup-btn" id="successPopupBtn">OK</button>
+        </div>
     </div>
 
     <script>
@@ -1137,6 +1220,9 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const successPopup = document.getElementById('successPopup');
+        const successPopupBtn = document.getElementById('successPopupBtn');
+        const successMessage = document.getElementById('successMessage');
 
         // Content Sections
         const dashboardContent = document.getElementById('dashboardContent');
@@ -1185,8 +1271,21 @@
 
         overlay.addEventListener('click', function() {
             notificationPopup.classList.remove('show');
-            overlay.classList.remove('show');
             profileMenu.classList.remove('show');
+            
+            if (profilePage.classList.contains('show')) {
+                profilePage.classList.remove('show');
+                profilePage.classList.add('hide');
+                setTimeout(() => {
+                    profilePage.classList.remove('hide');
+                }, 300);
+            }
+            
+            if (successPopup.classList.contains('show')) {
+                successPopup.classList.remove('show');
+            }
+            
+            overlay.classList.remove('show');
         });
 
         // Navigation buttons
@@ -1246,15 +1345,23 @@
             e.preventDefault();
             profileMenu.classList.remove('show');
             
-            // Show profile page
-            profilePage.style.display = 'block';
+            // Show profile page with animation
+            profilePage.classList.add('show');
+            overlay.classList.add('show');
             
             // Load current profile data
             loadProfileData();
         });
 
         backToDashboard.addEventListener('click', function() {
-            profilePage.style.display = 'none';
+            profilePage.classList.remove('show');
+            profilePage.classList.add('hide');
+            overlay.classList.remove('show');
+            
+            // Remove hide class after animation completes
+            setTimeout(() => {
+                profilePage.classList.remove('hide');
+            }, 300);
         });
 
         // Load profile data from localStorage
@@ -1314,8 +1421,16 @@
                 usernameSpan.textContent = profileData.nickname;
             }
             
-            // Show success message (you can enhance this with a proper notification)
-            alert('Profile saved successfully!');
+            // Show success popup
+            successMessage.textContent = "Profile saved successfully!";
+            successPopup.classList.add('show');
+            overlay.classList.add('show');
+        });
+
+        // Success popup button handler
+        successPopupBtn.addEventListener('click', function() {
+            successPopup.classList.remove('show');
+            overlay.classList.remove('show');
         });
 
         // Logout functionality
@@ -1335,6 +1450,7 @@
             notificationPopup.classList.remove('show');
             overlay.classList.remove('show');
             profilePage.style.display = 'none';
+            successPopup.classList.remove('show');
         });
 
         // Sidebar Toggle Functionality
