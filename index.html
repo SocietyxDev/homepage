@@ -1140,6 +1140,7 @@
             border: var(--glass-border);
             box-shadow: var(--glass-shadow);
             transition: var(--transition);
+            cursor: pointer;
         }
 
         .hit-card:hover {
@@ -1153,10 +1154,18 @@
             margin-bottom: 10px;
         }
 
-        .hit-card p {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin-bottom: 15px;
+        .hit-link {
+            display: block;
+            color: var(--primary);
+            margin: 10px 0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .hit-link:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
         }
 
         .hit-card .meta {
@@ -1413,25 +1422,25 @@
                 <p>This section would display your hits management interface.</p>
                 
                 <div class="hits-grid">
-                    <div class="hit-card">
+                    <div class="hit-card" onclick="window.open('https://example.com/target1', '_blank')">
                         <h3>Target Acquisition</h3>
-                        <p>View and manage your current target list and assignments.</p>
+                        <a href="https://example.com/target1" target="_blank" class="hit-link">View Target Details</a>
                         <div class="meta">
                             <span>Status: Active</span>
                             <span>Priority: High</span>
                         </div>
                     </div>
-                    <div class="hit-card">
+                    <div class="hit-card" onclick="window.open('https://example.com/reports', '_blank')">
                         <h3>Mission Reports</h3>
-                        <p>Review completed missions and operational details.</p>
+                        <a href="https://example.com/reports" target="_blank" class="hit-link">Access Reports</a>
                         <div class="meta">
                             <span>Status: Archived</span>
                             <span>Last Update: 2 days ago</span>
                         </div>
                     </div>
-                    <div class="hit-card">
+                    <div class="hit-card" onclick="window.open('https://example.com/resources', '_blank')">
                         <h3>Resource Allocation</h3>
-                        <p>Manage your available resources and assignments.</p>
+                        <a href="https://example.com/resources" target="_blank" class="hit-link">Manage Resources</a>
                         <div class="meta">
                             <span>Status: Monitoring</span>
                             <span>Resources: 5 available</span>
@@ -1909,6 +1918,11 @@
             e.preventDefault();
             profileMenu.classList.remove('show');
             
+            // Hide sidebar on mobile when opening profile
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+            }
+            
             // Show profile page with animation
             profilePage.classList.add('show');
             
@@ -1919,6 +1933,11 @@
         backToDashboard.addEventListener('click', function() {
             profilePage.classList.remove('show');
             profilePage.classList.add('hide');
+            
+            // Show sidebar again on mobile when closing profile
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('active');
+            }
             
             // Remove hide class after animation completes
             setTimeout(() => {
