@@ -45,9 +45,38 @@
             background-color: var(--dark-bg);
             color: var(--text-dark);
             font-family: var(--font-game);
-            background-image: 
-                radial-gradient(circle at 25% 25%, rgba(255, 51, 102, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 75% 75%, rgba(255, 51, 102, 0.1) 0%, transparent 50%);
+            overflow: hidden;
+        }
+
+        /* Star Background Animation */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        .star.red {
+            background: var(--primary);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(var(--tx), var(--ty)); }
         }
 
         /* Login Page Styles */
@@ -59,6 +88,8 @@
             background-color: var(--dark-bg);
             text-align: center;
             font-family: var(--font-game);
+            position: relative;
+            z-index: 1;
         }
 
         .login-content {
@@ -103,16 +134,17 @@
             }
         }
 
+        /* Enhanced Discord Login Button */
         .discord-login-btn {
-            background-color: var(--primary);
+            background-color: transparent;
             color: white;
-            border: none;
+            border: 2px solid var(--primary);
             padding: 16px 32px;
-            border-radius: 8px;
+            border-radius: 50px;
             font-weight: 600;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.4s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -120,48 +152,54 @@
             width: 100%;
             max-width: 300px;
             margin-top: 2rem;
-            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.4);
             font-family: var(--font-game);
             text-transform: uppercase;
             letter-spacing: 1px;
             position: relative;
             overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.5),
+                        inset 0 0 10px rgba(255, 51, 102, 0.3);
         }
 
         .discord-login-btn:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 51, 102, 0.6);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.8),
+                        inset 0 0 10px rgba(255, 51, 102, 0.5);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
         }
 
         .discord-login-btn::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(
-                to bottom right,
-                rgba(255, 255, 255, 0.3) 0%,
-                rgba(255, 255, 255, 0) 60%
+                90deg,
+                transparent,
+                rgba(255, 51, 102, 0.4),
+                transparent
             );
-            transform: rotate(30deg);
-            pointer-events: none;
+            transition: 0.5s;
+            z-index: -1;
         }
 
         .discord-login-btn:hover::before {
-            animation: shine 1.5s infinite;
-        }
-
-        @keyframes shine {
-            100% {
-                transform: rotate(30deg) translate(100%, 100%);
-            }
+            left: 100%;
         }
 
         .discord-login-btn i {
             font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .discord-login-btn:hover i {
+            transform: scale(1.2);
+            color: #7289da;
+            text-shadow: 0 0 10px rgba(114, 137, 218, 0.8);
         }
 
         /* Dashboard Styles */
@@ -1282,6 +1320,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Star Background -->
+    <div class="stars" id="stars"></div>
+
     <!-- Login Page (shown by default) -->
     <div class="login-container" id="loginPage">
         <div class="login-content">
@@ -1579,6 +1620,45 @@
     </div>
 
     <script>
+        // Create star background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Randomize star properties
+                const size = Math.random() * 2 + 1;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const duration = Math.random() * 5 + 5 + 's';
+                const delay = Math.random() * 5 + 's';
+                const isRed = Math.random() > 0.7;
+                
+                if (isRed) {
+                    star.classList.add('red');
+                }
+                
+                // Random movement direction and distance
+                const tx = (Math.random() - 0.5) * 20;
+                const ty = (Math.random() - 0.5) * 20;
+                
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${posX}%`;
+                star.style.top = `${posY}%`;
+                star.style.setProperty('--duration', duration);
+                star.style.animationDelay = delay;
+                star.style.setProperty('--tx', `${tx}px`);
+                star.style.setProperty('--ty', `${ty}px`);
+                star.style.animation = `float ${Math.random() * 20 + 10}s infinite alternate ease-in-out`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
         // Discord OAuth Configuration
         const DISCORD_CLIENT_ID = "1345573828956520528";
         const DISCORD_REDIRECT_URI = window.location.href.includes('localhost') ? 
@@ -1687,6 +1767,7 @@
 
         // Initialize the app
         function init() {
+            createStars(); // Add star background
             checkExistingSession();
             checkAuthResponse();
             initDiscordLogin();
