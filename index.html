@@ -1125,6 +1125,47 @@
             background: #000;
         }
 
+        /* Hits Grid Styles */
+        .hits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .hit-card {
+            background: rgba(15, 15, 25, 0.7);
+            border-radius: 8px;
+            padding: 20px;
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: var(--transition);
+        }
+
+        .hit-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(255, 51, 102, 0.3);
+            border-color: rgba(255, 51, 102, 0.5);
+        }
+
+        .hit-card h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .hit-card p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .hit-card .meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
         /* Responsive Styles */
         @media (max-width: 768px) {
             .game-title {
@@ -1315,6 +1356,12 @@
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
+                            <i class="fas fa-video"></i>
+                            <span>Tutorials</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
                             <i class="fas fa-tools"></i>
                             <span>Tools</span>
                         </a>
@@ -1359,9 +1406,43 @@
                 <p>This is your dark glass-themed dashboard with red accents.</p>
             </div>
 
-            <!-- Hits Content -->
+            <!-- New Hits Content -->
             <div class="content hidden" id="hitsContent">
                 <h1 class="game-title-retro">HITS</h1>
+                <h2>Hits Management</h2>
+                <p>This section would display your hits management interface.</p>
+                
+                <div class="hits-grid">
+                    <div class="hit-card">
+                        <h3>Target Acquisition</h3>
+                        <p>View and manage your current target list and assignments.</p>
+                        <div class="meta">
+                            <span>Status: Active</span>
+                            <span>Priority: High</span>
+                        </div>
+                    </div>
+                    <div class="hit-card">
+                        <h3>Mission Reports</h3>
+                        <p>Review completed missions and operational details.</p>
+                        <div class="meta">
+                            <span>Status: Archived</span>
+                            <span>Last Update: 2 days ago</span>
+                        </div>
+                    </div>
+                    <div class="hit-card">
+                        <h3>Resource Allocation</h3>
+                        <p>Manage your available resources and assignments.</p>
+                        <div class="meta">
+                            <span>Status: Monitoring</span>
+                            <span>Resources: 5 available</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tutorials Content (renamed from Hits) -->
+            <div class="content hidden" id="tutorialsContent">
+                <h1 class="game-title-retro">TUTORIALS</h1>
                 <h2>Video Tutorials</h2>
                 <p>Watch and learn from our collection of tutorial videos.</p>
                 
@@ -1544,6 +1625,7 @@
         // Content Sections
         const dashboardContent = document.getElementById('dashboardContent');
         const hitsContent = document.getElementById('hitsContent');
+        const tutorialsContent = document.getElementById('tutorialsContent');
         const toolsContent = document.getElementById('toolsContent');
         const settingsContent = document.getElementById('settingsContent');
 
@@ -1997,6 +2079,7 @@
                     // Hide all content sections
                     dashboardContent.classList.add('hidden');
                     hitsContent.classList.add('hidden');
+                    tutorialsContent.classList.add('hidden');
                     toolsContent.classList.add('hidden');
                     settingsContent.classList.add('hidden');
                     
@@ -2005,6 +2088,10 @@
                         case 'hits':
                             hitsContent.classList.remove('hidden');
                             pageTitle.textContent = 'Hits';
+                            break;
+                        case 'tutorials':
+                            tutorialsContent.classList.remove('hidden');
+                            pageTitle.textContent = 'Tutorials';
                             break;
                         case 'tools':
                             toolsContent.classList.remove('hidden');
@@ -2018,6 +2105,11 @@
                             dashboardContent.classList.remove('hidden');
                             pageTitle.textContent = 'Dashboard';
                             break;
+                    }
+                    
+                    // Close sidebar on mobile after selection
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('active');
                     }
                 });
             });
