@@ -48,7 +48,7 @@
             overflow: hidden;
         }
 
-        /* Star Background Animation */
+        /* Enhanced Star Background Animation */
         .stars {
             position: fixed;
             top: 0;
@@ -62,15 +62,20 @@
             position: absolute;
             background: white;
             border-radius: 50%;
-            animation: twinkle var(--duration) infinite ease-in-out;
+            animation: 
+                twinkle var(--duration) infinite ease-in-out,
+                float var(--float-duration) infinite alternate ease-in-out;
+            will-change: opacity, transform;
         }
 
         .star.red {
             background: var(--primary);
+            box-shadow: 0 0 5px var(--primary), 
+                        0 0 10px var(--primary);
         }
 
         @keyframes twinkle {
-            0%, 100% { opacity: 0.2; }
+            0%, 100% { opacity: 0.3; }
             50% { opacity: 1; }
         }
 
@@ -1745,17 +1750,16 @@
     </div>
 
     <script>
-        // Create star background
+        // Create enhanced star background
         function createStars() {
             const starsContainer = document.getElementById('stars');
-            const starCount = 150;
+            const starCount = 200;
             
             for (let i = 0; i < starCount; i++) {
                 const star = document.createElement('div');
                 star.classList.add('star');
                 
-                // Randomize star properties
-                const size = Math.random() * 2 + 1;
+                const size = Math.random() * 3 + 1;
                 const posX = Math.random() * 100;
                 const posY = Math.random() * 100;
                 const duration = Math.random() * 5 + 5 + 's';
@@ -1766,9 +1770,8 @@
                     star.classList.add('red');
                 }
                 
-                // Random movement direction and distance
-                const tx = (Math.random() - 0.5) * 20;
-                const ty = (Math.random() - 0.5) * 20;
+                const tx = (Math.random() - 0.5) * 10;
+                const ty = (Math.random() - 0.5) * 10;
                 
                 star.style.width = `${size}px`;
                 star.style.height = `${size}px`;
@@ -1778,7 +1781,7 @@
                 star.style.animationDelay = delay;
                 star.style.setProperty('--tx', `${tx}px`);
                 star.style.setProperty('--ty', `${ty}px`);
-                star.style.animation = `float ${Math.random() * 20 + 10}s infinite alternate ease-in-out`;
+                star.style.setProperty('--float-duration', `${Math.random() * 30 + 20}s`);
                 
                 starsContainer.appendChild(star);
             }
@@ -1790,11 +1793,11 @@
             "http://localhost:8000" : "https://homepage-nu-beige.vercel.app/";
         const DISCORD_SCOPES = ["identify"];
 
-        // Admin Configuration
+        // Admin Configuration - REPLACE THESE WITH YOUR DISCORD IDs
         const ADMIN_DISCORD_IDS = [
-            "1336300127815598153",  // Replace with your Discord ID
-            "1336472828379140159",  // Add additional admin IDs
-            "THIRD_ADMIN_DISCORD_ID"    // As needed
+            "YOUR_DISCORD_ID_HERE",  // Replace with your Discord ID
+            "SECOND_ADMIN_ID_HERE",  // Add additional admin IDs
+            "THIRD_ADMIN_ID_HERE"    // As needed
         ];
 
         // DOM Elements
@@ -1890,6 +1893,7 @@
             loadSavedVideos();
             setupNotifications();
             setupAdminNotificationControls();
+            setupLogout();
         }
 
         // Notification System Functions
@@ -2327,27 +2331,27 @@
             }, 3000);
         }
 
-        // Logout functionality
-        logoutBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            // Clear any stored user data
-            localStorage.removeItem('discordUser');
-            localStorage.removeItem('profileData');
-            localStorage.removeItem('sidebarCollapsed');
-            localStorage.removeItem('tutorialVideos');
-            // Return to login page
-            dashboard.style.display = 'none';
-            loginPage.style.display = 'flex';
-            // Reset avatar and username
-            userAvatar.src = '';
-            usernameSpan.textContent = 'User';
-            // Close any open popups
-            notificationPopup.classList.remove('show');
-            overlay.classList.remove('show');
-            profilePage.style.display = 'none';
-            successPopup.classList.remove('show');
-            videoModal.classList.remove('active');
-        });
+        // Updated logout functionality (preserves profile data)
+        function setupLogout() {
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Only clear authentication data (keep profile/tutorials)
+                localStorage.removeItem('discordUser'); 
+                
+                // Reset UI
+                dashboard.style.display = 'none';
+                loginPage.style.display = 'flex';
+                userAvatar.src = '';
+                usernameSpan.textContent = 'User';
+                
+                // Close all popups
+                notificationPopup.classList.remove('show');
+                overlay.classList.remove('show');
+                profilePage.style.display = 'none';
+                successPopup.classList.remove('show');
+                videoModal.classList.remove('active');
+            });
+        }
 
         // Sidebar Toggle Functionality
         function initSidebarToggle() {
