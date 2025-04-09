@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>IMMORTAL | Login</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -222,7 +222,7 @@
             font-family: var(--font-dashboard);
         }
 
-        /* Enhanced Notification System */
+        /* Updated Notification System */
         .notification-container {
             position: fixed;
             bottom: 20px;
@@ -245,8 +245,6 @@
             border: none;
             transition: var(--transition);
             position: relative;
-            backdrop-filter: var(--glass-backdrop);
-            -webkit-backdrop-filter: var(--glass-backdrop);
             border: var(--glass-border);
         }
 
@@ -273,6 +271,10 @@
             animation: pulse 1.5s infinite;
         }
 
+        .notification-badge.hidden {
+            display: none;
+        }
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -281,27 +283,25 @@
 
         .notification-popup {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 400px;
-            max-width: 90%;
-            max-height: 80vh;
+            bottom: 80px;
+            right: 20px;
+            width: 350px;
+            max-width: 90vw;
+            max-height: 60vh;
             border-radius: 10px;
             z-index: 1001;
-            display: none;
             overflow: hidden;
             font-family: var(--font-dashboard);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
         }
 
         .notification-popup.show {
-            display: block;
-            animation: popIn 0.3s ease-out;
-        }
-
-        @keyframes popIn {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: all;
         }
 
         .notification-header {
@@ -330,6 +330,7 @@
             padding: 20px;
             max-height: 300px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .notification-item {
@@ -408,6 +409,66 @@
 
         .overlay.show {
             display: block;
+        }
+
+        /* Admin Notification Panel */
+        .admin-notification-panel {
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px dashed var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .admin-notification-panel h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-notification-panel .form-group {
+            margin-bottom: 15px;
+        }
+
+        .admin-notification-panel .form-control {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: var(--glass-border);
+            border-radius: 5px;
+            color: var(--text-dark);
+            font-family: var(--font-dashboard);
+        }
+
+        .admin-notification-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-admin {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-admin:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-admin i {
+            font-size: 0.9rem;
         }
 
         /* Enhanced Profile Dropdown */
@@ -716,7 +777,7 @@
             line-height: 1.6;
         }
 
-        /* Profile Page Styles - UPDATED (removed blur/overlay) */
+        /* Profile Page Styles */
         .profile-page {
             display: none;
             position: fixed;
@@ -922,6 +983,11 @@
             animation: popIn 0.3s ease-out;
         }
 
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
         .success-popup h3 {
             color: var(--primary);
             margin-bottom: 15px;
@@ -961,6 +1027,7 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             margin-top: 30px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .video-card {
@@ -1252,6 +1319,7 @@
             .notification-popup {
                 width: 90%;
                 max-width: 350px;
+                max-height: 50vh;
             }
 
             .game-title-retro {
@@ -1298,6 +1366,13 @@
             .upload-actions {
                 flex-direction: column;
             }
+
+            /* Tutorials scroll fix */
+            .tutorials-content {
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                height: calc(100vh - 200px);
+            }
         }
 
         @media (max-width: 480px) {
@@ -1318,6 +1393,8 @@
     </style>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Socket.io for real-time notifications -->
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
     <!-- Star Background -->
@@ -1340,40 +1417,28 @@
         <div class="notification-container">
             <button class="notification-btn" id="notificationBtn">
                 <i class="fas fa-bell"></i>
-                <span class="notification-badge" id="notificationBadge">3</span>
+                <span class="notification-badge hidden" id="notificationBadge">0</span>
             </button>
-        </div>
-
-        <!-- Notification Popup -->
-        <div class="notification-popup" id="notificationPopup">
-            <div class="notification-header">
-                <span>Notifications</span>
-                <button class="notification-close" id="notificationClose">&times;</button>
-            </div>
-            <div class="notification-content" id="notificationContent">
-                <div class="notification-item">
-                    <div class="notification-title">New Update Available</div>
-                    <div class="notification-time">2 hours ago</div>
-                    <div class="notification-message">Version 2.5.0 is now available with new features and bug fixes. Check out the changelog for details!</div>
+            <div class="notification-popup" id="notificationPopup">
+                <div class="notification-header">
+                    <span>Notifications</span>
+                    <button class="notification-close" id="notificationClose">&times;</button>
                 </div>
-                <div class="notification-item">
-                    <div class="notification-title">Maintenance Scheduled</div>
-                    <div class="notification-time">1 day ago</div>
-                    <div class="notification-message">Server maintenance planned for tomorrow at 3 AM UTC. Expected downtime: 30 minutes.</div>
+                <div class="notification-content" id="notificationContent">
+                    <div class="notification-item">
+                        <div class="notification-title">Welcome to IMMORTAL</div>
+                        <div class="notification-time">Just now</div>
+                        <div class="notification-message">Thank you for joining our community!</div>
+                    </div>
                 </div>
-                <div class="notification-item">
-                    <div class="notification-title">Welcome to IMMORTAL</div>
-                    <div class="notification-time">3 days ago</div>
-                    <div class="notification-message">Thank you for joining our community! Get started by exploring the dashboard.</div>
+                <div class="notification-footer">
+                    <button class="notification-nav-btn" id="prevNotification" disabled>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <button class="notification-nav-btn" id="nextNotification">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
-            </div>
-            <div class="notification-footer">
-                <button class="notification-nav-btn" id="prevNotification" disabled>
-                    <i class="fas fa-chevron-left"></i> Previous
-                </button>
-                <button class="notification-nav-btn" id="nextNotification">
-                    Next <i class="fas fa-chevron-right"></i>
-                </button>
             </div>
         </div>
 
@@ -1439,7 +1504,6 @@
                         <div class="profile-menu" id="profileMenu">
                             <a href="#" id="profileBtn">
                                 <i class="fas fa-user"></i> Profile 
-                                <!-- Admin badge added dynamically -->
                             </a>
                             <a href="#" class="logout" id="logoutBtn">
                                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -1454,6 +1518,36 @@
                 <h1 class="game-title-retro">IMMORTAL</h1>
                 <h2>Welcome back, <span id="username">User</span>!</h2>
                 <p>This is your dark glass-themed dashboard with red accents.</p>
+                
+                <!-- Admin Notification Panel -->
+                <div class="admin-notification-panel hidden" id="adminNotificationPanel">
+                    <h3><i class="fas fa-bell"></i> Admin Notification Center</h3>
+                    <div class="form-group">
+                        <label for="notificationTitle">Title</label>
+                        <input type="text" id="notificationTitle" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="notificationMessage">Message</label>
+                        <textarea id="notificationMessage" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="notificationTime">Display Time</label>
+                        <select id="notificationTime" class="form-control">
+                            <option value="Just now">Just now</option>
+                            <option value="1 hour ago">1 hour ago</option>
+                            <option value="Today">Today</option>
+                            <option value="Yesterday">Yesterday</option>
+                        </select>
+                    </div>
+                    <div class="admin-notification-actions">
+                        <button id="sendNotificationBtn" class="btn-admin">
+                            <i class="fas fa-paper-plane"></i> Send Notification
+                        </button>
+                        <button id="clearNotificationFormBtn" class="btn-admin">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- New Hits Content -->
@@ -1490,14 +1584,45 @@
                 </div>
             </div>
 
-            <!-- Tutorials Content (renamed from Hits) -->
+            <!-- Tutorials Content -->
             <div class="content hidden" id="tutorialsContent">
                 <h1 class="game-title-retro">TUTORIALS</h1>
                 <h2>Video Tutorials</h2>
                 <p>Watch and learn from our collection of tutorial videos.</p>
                 
                 <div class="video-grid" id="videoGrid">
-                    <!-- Video cards will be added here dynamically -->
+                    <div class="video-card" data-video-id="1">
+                        <div class="video-thumbnail">
+                            <img src="https://via.placeholder.com/400x225/1a1a2e/ff3366?text=IMMORTAL+Tutorial" alt="Getting Started">
+                            <div class="play-icon">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <h3>Getting Started with IMMORTAL</h3>
+                            <p>Learn the basics of using our platform and its core features.</p>
+                            <div class="meta">
+                                <span>4:32</span>
+                                <span>2023-05-15</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-card" data-video-id="2">
+                        <div class="video-thumbnail">
+                            <img src="https://via.placeholder.com/400x225/1a1a2e/ff3366?text=Advanced+Techniques" alt="Advanced Techniques">
+                            <div class="play-icon">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <h3>Advanced Hit Techniques</h3>
+                            <p>Master advanced techniques for maximum efficiency in your operations.</p>
+                            <div class="meta">
+                                <span>7:45</span>
+                                <span>2023-06-02</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Admin-only upload section -->
@@ -1710,6 +1835,12 @@
         const modalVideoPlayer = document.getElementById('modalVideoPlayer');
         const uploadSection = document.getElementById('uploadSection');
         const nonAdminMessage = document.getElementById('nonAdminMessage');
+        const adminNotificationPanel = document.getElementById('adminNotificationPanel');
+        const sendNotificationBtn = document.getElementById('sendNotificationBtn');
+        const clearNotificationFormBtn = document.getElementById('clearNotificationFormBtn');
+        const notificationTitle = document.getElementById('notificationTitle');
+        const notificationMessage = document.getElementById('notificationMessage');
+        const notificationTime = document.getElementById('notificationTime');
 
         // Content Sections
         const dashboardContent = document.getElementById('dashboardContent');
@@ -1718,30 +1849,10 @@
         const toolsContent = document.getElementById('toolsContent');
         const settingsContent = document.getElementById('settingsContent');
 
-        // Enhanced Notification System
+        // Notification System
+        let notifications = [];
         let currentNotificationIndex = 0;
-        const notifications = [
-            {
-                title: "New Update Available",
-                time: "2 hours ago",
-                message: "Version 2.5.0 is now available with new features and bug fixes. Check out the changelog for details!"
-            },
-            {
-                title: "Maintenance Scheduled",
-                time: "1 day ago",
-                message: "Server maintenance planned for tomorrow at 3 AM UTC. Expected downtime: 30 minutes."
-            },
-            {
-                title: "Welcome to IMMORTAL",
-                time: "3 days ago",
-                message: "Thank you for joining our community! Get started by exploring the dashboard."
-            },
-            {
-                title: "Security Alert",
-                time: "Just now",
-                message: "We've detected a new security patch available. Please update your client as soon as possible."
-            }
-        ];
+        let notificationSocket = null;
 
         // Video Tutorial System
         let videos = [
@@ -1767,17 +1878,188 @@
 
         // Initialize the app
         function init() {
-            createStars(); // Add star background
+            createStars();
             checkExistingSession();
             checkAuthResponse();
             initDiscordLogin();
             initSidebarToggle();
             initMobileMenu();
             initContentNavigation();
-            updateNotificationDisplay();
             initProfile();
             initVideoSystem();
             loadSavedVideos();
+            setupNotifications();
+            setupAdminNotificationControls();
+        }
+
+        // Notification System Functions
+        function setupNotifications() {
+            // Initialize with one welcome notification
+            notifications = [{
+                title: "Welcome to IMMORTAL",
+                message: "Thank you for joining our community!",
+                time: "Just now"
+            }];
+            updateNotificationDisplay();
+
+            // Initialize WebSocket connection
+            if (typeof io !== 'undefined') {
+                notificationSocket = io();
+                
+                notificationSocket.on('new-notification', (notification) => {
+                    notifications.unshift(notification);
+                    updateNotificationDisplay();
+                    showNewNotificationBadge();
+                });
+            }
+
+            // Notification button click handler
+            notificationBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                notificationPopup.classList.toggle('show');
+                
+                if (notificationPopup.classList.contains('show')) {
+                    notificationBadge.classList.add('hidden');
+                }
+            });
+
+            // Close notification when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.notification-container')) {
+                    notificationPopup.classList.remove('show');
+                }
+            });
+
+            // Navigation buttons
+            prevNotification.addEventListener('click', showPreviousNotification);
+            nextNotification.addEventListener('click', showNextNotification);
+            notificationClose.addEventListener('click', closeNotifications);
+        }
+
+        function showNewNotificationBadge() {
+            notificationBadge.textContent = notifications.length;
+            notificationBadge.classList.remove('hidden');
+            notificationBadge.style.animation = 'none';
+            void notificationBadge.offsetWidth; // Trigger reflow
+            notificationBadge.style.animation = 'pulse 1.5s infinite';
+        }
+
+        function updateNotificationDisplay() {
+            if (notifications.length === 0) {
+                notificationContent.innerHTML = 
+                    '<div class="notification-item">No notifications yet</div>';
+                return;
+            }
+
+            const notification = notifications[currentNotificationIndex];
+            notificationContent.innerHTML = `
+                <div class="notification-item">
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-time">${notification.time}</div>
+                    <div class="notification-message">${notification.message}</div>
+                </div>
+            `;
+
+            // Update button states
+            prevNotification.disabled = currentNotificationIndex === 0;
+            nextNotification.disabled = currentNotificationIndex === notifications.length - 1;
+        }
+
+        function showPreviousNotification() {
+            if (currentNotificationIndex > 0) {
+                currentNotificationIndex--;
+                updateNotificationDisplay();
+            }
+        }
+
+        function showNextNotification() {
+            if (currentNotificationIndex < notifications.length - 1) {
+                currentNotificationIndex++;
+                updateNotificationDisplay();
+            }
+        }
+
+        function closeNotifications() {
+            notificationPopup.classList.remove('show');
+        }
+
+        // Admin Notification Controls
+        function setupAdminNotificationControls() {
+            sendNotificationBtn.addEventListener('click', sendAdminNotification);
+            clearNotificationFormBtn.addEventListener('click', clearNotificationForm);
+        }
+
+        function sendAdminNotification() {
+            const title = notificationTitle.value;
+            const message = notificationMessage.value;
+            const time = notificationTime.value;
+            
+            if (!title || !message) {
+                showSuccessMessage('Please fill in title and message');
+                return;
+            }
+            
+            const newNotification = {
+                title,
+                message,
+                time
+            };
+            
+            if (typeof io !== 'undefined' && notificationSocket) {
+                // Send via WebSocket if available
+                notificationSocket.emit('send-notification', newNotification);
+            } else {
+                // Fallback for local testing
+                notifications.unshift(newNotification);
+                updateNotificationDisplay();
+                showNewNotificationBadge();
+            }
+            
+            clearNotificationForm();
+            showSuccessMessage('Notification sent successfully!');
+        }
+
+        function clearNotificationForm() {
+            notificationTitle.value = '';
+            notificationMessage.value = '';
+            notificationTime.value = 'Just now';
+        }
+
+        // Admin Functions
+        function checkAdminStatus() {
+            const user = JSON.parse(localStorage.getItem('discordUser')) || {};
+            const isAdmin = ADMIN_DISCORD_IDS.includes(user.id);
+            
+            if (isAdmin) {
+                // Show admin sections
+                uploadSection.style.display = 'block';
+                nonAdminMessage.style.display = 'none';
+                adminNotificationPanel.classList.remove('hidden');
+                
+                // Add admin badge to profile
+                if (!profileBtn.querySelector('.admin-badge')) {
+                    const badge = document.createElement('span');
+                    badge.className = 'admin-badge';
+                    badge.innerHTML = ' <i class="fas fa-crown" style="color: gold;"></i>';
+                    badge.title = 'Administrator';
+                    profileBtn.appendChild(badge);
+                }
+                
+                // Add admin styling to profile menu
+                profileBtn.classList.add('admin-indicator');
+            } else {
+                // Hide admin sections
+                uploadSection.style.display = 'none';
+                nonAdminMessage.style.display = 'block';
+                adminNotificationPanel.classList.add('hidden');
+                
+                // Remove admin badge if exists
+                const badge = document.querySelector('.admin-badge');
+                if (badge) badge.remove();
+                
+                // Remove admin styling
+                profileBtn.classList.remove('admin-indicator');
+            }
         }
 
         // Video System Functions
@@ -1870,7 +2152,7 @@
             const thumbnailFile = document.getElementById('videoThumbnail').files[0];
             
             if (!title || !description || !videoFile) {
-                alert('Please fill in all required fields');
+                showSuccessMessage('Please fill in all required fields');
                 return;
             }
             
@@ -1919,65 +2201,6 @@
             if (savedVideos) {
                 videos = JSON.parse(savedVideos);
                 renderVideoGrid();
-            }
-        }
-
-        // Admin Functions
-        function checkAdminStatus() {
-            const user = JSON.parse(localStorage.getItem('discordUser')) || {};
-            const isAdmin = ADMIN_DISCORD_IDS.includes(user.id);
-            
-            if (isAdmin) {
-                uploadSection.style.display = 'block';
-                nonAdminMessage.style.display = 'none';
-                
-                // Add admin badge to profile
-                const profileBtn = document.getElementById('profileBtn');
-                if (!profileBtn.querySelector('.admin-badge')) {
-                    const badge = document.createElement('span');
-                    badge.className = 'admin-badge';
-                    badge.innerHTML = ' <i class="fas fa-crown" style="color: gold;"></i>';
-                    badge.title = 'Administrator';
-                    profileBtn.appendChild(badge);
-                }
-                
-                // Add admin styling to profile menu
-                profileBtn.classList.add('admin-indicator');
-            } else {
-                uploadSection.style.display = 'none';
-                nonAdminMessage.style.display = 'block';
-                
-                // Remove admin badge if exists
-                const badge = document.querySelector('.admin-badge');
-                if (badge) badge.remove();
-                
-                // Remove admin styling
-                profileBtn.classList.remove('admin-indicator');
-            }
-        }
-
-        // Notification System
-        function updateNotificationDisplay() {
-            const notification = notifications[currentNotificationIndex];
-            notificationContent.innerHTML = `
-                <div class="notification-item">
-                    <div class="notification-title">${notification.title}</div>
-                    <div class="notification-time">${notification.time}</div>
-                    <div class="notification-message">${notification.message}</div>
-                </div>
-            `;
-            
-            // Update button states
-            prevNotification.disabled = currentNotificationIndex === 0;
-            nextNotification.disabled = currentNotificationIndex === notifications.length - 1;
-            
-            // Update badge if viewing the last notification
-            if (currentNotificationIndex === notifications.length - 1) {
-                notificationBadge.textContent = '0';
-                notificationBadge.style.display = 'none';
-            } else {
-                notificationBadge.textContent = (notifications.length - currentNotificationIndex - 1).toString();
-                notificationBadge.style.display = 'flex';
             }
         }
 
@@ -2085,8 +2308,6 @@
             
             // Show success popup
             showSuccessMessage("Profile saved successfully!");
-            successPopup.classList.add('show');
-            overlay.classList.add('show');
         });
 
         // Success popup button handler
@@ -2094,6 +2315,17 @@
             successPopup.classList.remove('show');
             overlay.classList.remove('show');
         });
+
+        function showSuccessMessage(message) {
+            successMessage.textContent = message;
+            successPopup.classList.add('show');
+            overlay.classList.add('show');
+            
+            setTimeout(() => {
+                successPopup.classList.remove('show');
+                overlay.classList.remove('show');
+            }, 3000);
+        }
 
         // Logout functionality
         logoutBtn.addEventListener('click', function(e) {
@@ -2315,17 +2547,6 @@
                 const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=token&scope=${DISCORD_SCOPES.join('%20')}`;
                 window.location.href = authUrl;
             });
-        }
-
-        function showSuccessMessage(message) {
-            successMessage.textContent = message;
-            successPopup.classList.add('show');
-            overlay.classList.add('show');
-            
-            setTimeout(() => {
-                successPopup.classList.remove('show');
-                overlay.classList.remove('show');
-            }, 3000);
         }
 
         // Start the app
