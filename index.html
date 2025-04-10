@@ -469,7 +469,6 @@
 
         .btn-admin:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-2px);
         }
 
         .btn-admin i {
@@ -1190,6 +1189,98 @@
             transform: translateY(-2px);
         }
 
+        /* Custom Video Player Styles */
+        .video-modal-player {
+            position: relative;
+            width: 100%;
+            background: #000;
+        }
+
+        .video-modal-player video {
+            width: 100%;
+            display: block;
+        }
+
+        .video-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            gap: 8px;
+        }
+
+        .control-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        .control-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .time-display {
+            color: white;
+            font-family: var(--font-dashboard);
+            margin: 0 10px;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            min-width: 100px;
+        }
+
+        .progress-container input[type="range"] {
+            width: 100%;
+            height: 5px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .progress-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Double tap detection */
+        .video-modal-player {
+            position: relative;
+        }
+
+        .video-modal-player .double-tap-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .video-modal-player .double-tap-overlay .tap-indicator {
+            font-size: 3rem;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
         /* Video Modal Styles */
         .video-modal {
             position: fixed;
@@ -1227,12 +1318,6 @@
             color: white;
             font-size: 1.5rem;
             cursor: pointer;
-        }
-
-        .video-modal-player {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #000;
         }
 
         /* Hits Grid Styles */
@@ -1283,6 +1368,14 @@
             justify-content: space-between;
             color: var(--text-light);
             font-size: 0.8rem;
+        }
+
+        /* Tutorials scroll fix */
+        .tutorials-content {
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+            -webkit-overflow-scrolling: touch;
+            padding-right: 10px;
         }
 
         /* Responsive Styles */
@@ -1374,9 +1467,17 @@
 
             /* Tutorials scroll fix */
             .tutorials-content {
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                height: calc(100vh - 200px);
+                max-height: calc(100vh - 150px);
+            }
+
+            /* Video controls adjustments */
+            .video-controls {
+                padding: 8px;
+            }
+            
+            .control-btn {
+                padding: 6px 8px;
+                font-size: 0.8rem;
             }
         }
 
@@ -1590,7 +1691,7 @@
             </div>
 
             <!-- Tutorials Content -->
-            <div class="content hidden" id="tutorialsContent">
+            <div class="content tutorials-content hidden" id="tutorialsContent">
                 <h1 class="game-title-retro">TUTORIALS</h1>
                 <h2>Video Tutorials</h2>
                 <p>Watch and learn from our collection of tutorial videos.</p>
@@ -1667,15 +1768,38 @@
                     <h3>Video Upload Restricted</h3>
                     <p>Only administrators can upload tutorial videos.</p>
                 </div>
-                
-                <!-- Video Modal -->
-                <div class="video-modal" id="videoModal">
-                    <div class="video-modal-content">
-                        <button class="video-modal-close" id="videoModalClose">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <div class="video-modal-player">
-                            <video controls id="modalVideoPlayer"></video>
+            </div>
+
+            <!-- Video Modal -->
+            <div class="video-modal" id="videoModal">
+                <div class="video-modal-content">
+                    <button class="video-modal-close" id="videoModalClose">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="video-modal-player">
+                        <video id="modalVideoPlayer"></video>
+                        <div class="video-controls">
+                            <button class="control-btn" id="playPauseBtn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="control-btn" id="back5Btn">
+                                <i class="fas fa-backward"></i> 5s
+                            </button>
+                            <button class="control-btn" id="forward5Btn">
+                                5s <i class="fas fa-forward"></i>
+                            </button>
+                            <button class="control-btn" id="forward10Btn">
+                                10s <i class="fas fa-fast-forward"></i>
+                            </button>
+                            <div class="time-display">
+                                <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+                            </div>
+                            <div class="progress-container">
+                                <input type="range" id="progressBar" min="0" max="100" value="0">
+                            </div>
+                            <button class="control-btn" id="fullscreenBtn">
+                                <i class="fas fa-expand"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1795,9 +1919,13 @@
 
         // Admin Configuration - REPLACE THESE WITH YOUR DISCORD IDs
         const ADMIN_DISCORD_IDS = [
-            "1336300127815598153",  // Replace with your Discord ID
-            "1336472828379140159",  // Add additional admin IDs
-            "THIRD_ADMIN_ID_HERE"    // As needed
+            "1336300127815598153",  // Admin 1
+            "1336472828379140159",  // Admin 2
+            "ADMIN_ID_3",           // Admin 3
+            "ADMIN_ID_4",           // Admin 4
+            "ADMIN_ID_5",           // Admin 5
+            "ADMIN_ID_6",           // Admin 6
+            "ADMIN_ID_7"            // Admin 7
         ];
 
         // DOM Elements
@@ -1845,6 +1973,16 @@
         const notificationMessage = document.getElementById('notificationMessage');
         const notificationTime = document.getElementById('notificationTime');
 
+        // Video Player Controls
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const back5Btn = document.getElementById('back5Btn');
+        const forward5Btn = document.getElementById('forward5Btn');
+        const forward10Btn = document.getElementById('forward10Btn');
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeDisplay = document.getElementById('currentTime');
+        const durationDisplay = document.getElementById('duration');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
         // Content Sections
         const dashboardContent = document.getElementById('dashboardContent');
         const hitsContent = document.getElementById('hitsContent');
@@ -1890,10 +2028,123 @@
             initContentNavigation();
             initProfile();
             initVideoSystem();
+            setupVideoPlayer();
             loadSavedVideos();
             setupNotifications();
             setupAdminNotificationControls();
             setupLogout();
+        }
+
+        // Custom Video Player Functionality
+        function setupVideoPlayer() {
+            // Double tap functionality
+            let lastTap = 0;
+            modalVideoPlayer.addEventListener('click', function(e) {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                
+                if (tapLength < 300 && tapLength > 0) {
+                    // Double tap detected
+                    if (e.clientX > window.innerWidth / 2) {
+                        // Right side - forward 10s
+                        modalVideoPlayer.currentTime += 10;
+                    } else {
+                        // Left side - back 10s
+                        modalVideoPlayer.currentTime = Math.max(0, modalVideoPlayer.currentTime - 10);
+                    }
+                    
+                    // Show visual feedback
+                    showTapFeedback(e.clientX > window.innerWidth / 2 ? 'forward' : 'backward');
+                }
+                
+                lastTap = currentTime;
+            });
+            
+            function showTapFeedback(direction) {
+                const overlay = document.createElement('div');
+                overlay.className = 'double-tap-overlay';
+                
+                const indicator = document.createElement('div');
+                indicator.className = 'tap-indicator';
+                indicator.innerHTML = direction === 'forward' ? 
+                    '<i class="fas fa-forward"></i> +10s' : 
+                    '<i class="fas fa-backward"></i> -10s';
+                
+                overlay.appendChild(indicator);
+                modalVideoPlayer.parentNode.appendChild(overlay);
+                
+                // Show then fade out
+                setTimeout(() => {
+                    indicator.style.opacity = '1';
+                    setTimeout(() => {
+                        indicator.style.opacity = '0';
+                        setTimeout(() => {
+                            overlay.remove();
+                        }, 300);
+                    }, 500);
+                }, 10);
+            }
+            
+            // Play/Pause
+            playPauseBtn.addEventListener('click', function() {
+                if (modalVideoPlayer.paused) {
+                    modalVideoPlayer.play();
+                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                } else {
+                    modalVideoPlayer.pause();
+                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            });
+            
+            // Skip buttons
+            back5Btn.addEventListener('click', () => {
+                modalVideoPlayer.currentTime = Math.max(0, modalVideoPlayer.currentTime - 5);
+            });
+            
+            forward5Btn.addEventListener('click', () => {
+                modalVideoPlayer.currentTime += 5;
+            });
+            
+            forward10Btn.addEventListener('click', () => {
+                modalVideoPlayer.currentTime += 10;
+            });
+            
+            // Progress bar
+            modalVideoPlayer.addEventListener('timeupdate', function() {
+                const percent = (modalVideoPlayer.currentTime / modalVideoPlayer.duration) * 100;
+                progressBar.value = percent || 0;
+                
+                // Update time display
+                currentTimeDisplay.textContent = formatTime(modalVideoPlayer.currentTime);
+            });
+            
+            progressBar.addEventListener('input', function() {
+                const seekTime = (progressBar.value / 100) * modalVideoPlayer.duration;
+                modalVideoPlayer.currentTime = seekTime;
+            });
+            
+            // Duration display
+            modalVideoPlayer.addEventListener('loadedmetadata', function() {
+                durationDisplay.textContent = formatTime(modalVideoPlayer.duration);
+            });
+            
+            // Fullscreen
+            fullscreenBtn.addEventListener('click', function() {
+                if (modalVideoPlayer.requestFullscreen) {
+                    modalVideoPlayer.requestFullscreen();
+                } else if (modalVideoPlayer.webkitRequestFullscreen) {
+                    modalVideoPlayer.webkitRequestFullscreen();
+                } else if (modalVideoPlayer.msRequestFullscreen) {
+                    modalVideoPlayer.msRequestFullscreen();
+                }
+            });
+            
+            // Format time as MM:SS
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+            }
         }
 
         // Notification System Functions
@@ -2141,12 +2392,14 @@
             modalVideoPlayer.poster = video.thumbnailUrl;
             videoModal.classList.add('active');
             modalVideoPlayer.play();
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
         }
 
         function closeVideoModal() {
             videoModal.classList.remove('active');
             modalVideoPlayer.pause();
             modalVideoPlayer.currentTime = 0;
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
         }
 
         function uploadVideo() {
@@ -2160,33 +2413,49 @@
                 return;
             }
             
-            // In a real app, you would upload to a server here
-            // For this demo, we'll simulate with a local object URL
-            const videoUrl = URL.createObjectURL(videoFile);
-            let thumbnailUrl = 'https://via.placeholder.com/400x225/1a1a2e/ff3366?text=' + encodeURIComponent(title);
+            // Create file readers for both files
+            const videoReader = new FileReader();
+            const thumbnailReader = thumbnailFile ? new FileReader() : null;
             
-            if (thumbnailFile) {
-                thumbnailUrl = URL.createObjectURL(thumbnailFile);
-            }
-            
-            // Create new video object
-            const newVideo = {
-                id: Date.now().toString(),
-                title,
-                description,
-                videoUrl,
-                thumbnailUrl,
-                uploadDate: new Date().toLocaleDateString(),
-                duration: '0:00' // Would calculate this in a real app
+            videoReader.onload = function(e) {
+                const videoData = {
+                    id: Date.now().toString(),
+                    title,
+                    description,
+                    videoUrl: e.target.result,
+                    thumbnailUrl: '',
+                    uploadDate: new Date().toLocaleDateString(),
+                    duration: '0:00'
+                };
+                
+                if (thumbnailReader) {
+                    thumbnailReader.onload = function(e) {
+                        videoData.thumbnailUrl = e.target.result;
+                        completeVideoUpload(videoData);
+                    };
+                    thumbnailReader.readAsDataURL(thumbnailFile);
+                } else {
+                    // Use default thumbnail if none provided
+                    videoData.thumbnailUrl = 'https://via.placeholder.com/400x225/1a1a2e/ff3366?text=' + encodeURIComponent(title);
+                    completeVideoUpload(videoData);
+                }
             };
             
-            // Add to videos array
-            videos.unshift(newVideo);
+            videoReader.readAsDataURL(videoFile);
+        }
+
+        function completeVideoUpload(videoData) {
+            // Get existing videos or initialize array
+            let allVideos = JSON.parse(localStorage.getItem('allVideos')) || [];
             
-            // Save to localStorage
-            saveVideos();
+            // Add new video
+            allVideos.unshift(videoData);
             
-            // Re-render grid
+            // Save back to localStorage
+            localStorage.setItem('allVideos', JSON.stringify(allVideos));
+            
+            // Update local videos array and render
+            videos = allVideos;
             renderVideoGrid();
             
             // Reset form
@@ -2196,12 +2465,8 @@
             showSuccessMessage('Video uploaded successfully!');
         }
 
-        function saveVideos() {
-            localStorage.setItem('tutorialVideos', JSON.stringify(videos));
-        }
-
         function loadSavedVideos() {
-            const savedVideos = localStorage.getItem('tutorialVideos');
+            const savedVideos = localStorage.getItem('allVideos');
             if (savedVideos) {
                 videos = JSON.parse(savedVideos);
                 renderVideoGrid();
@@ -2335,8 +2600,19 @@
         function setupLogout() {
             logoutBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                // Only clear authentication data (keep profile/tutorials)
+                
+                // Get current profile data before logout
+                const profileData = JSON.parse(localStorage.getItem('profileData')) || {};
+                const discordUser = JSON.parse(localStorage.getItem('discordUser'));
+                
+                // Clear only authentication data
                 localStorage.removeItem('discordUser'); 
+                
+                // Restore profile data (without sensitive info)
+                if (discordUser && discordUser.id) {
+                    profileData.userId = discordUser.id; // Store for matching later
+                    localStorage.setItem('profileData', JSON.stringify(profileData));
+                }
                 
                 // Reset UI
                 dashboard.style.display = 'none';
